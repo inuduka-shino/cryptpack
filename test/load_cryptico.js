@@ -3,13 +3,26 @@
 const expect = require('chai').expect;
 // ref: http://blog.verygoodtown.com/2011/09/generating-an-rsa-key-pair-public-key-string/
 
+const transStrCode = (()=>{
+  const utf8 = 'utf8',
+        base64 = 'base64';
+
+  function codeTrans(codeA,codeB,str) {
+    return (new Buffer(str,codeA)).toString(codeB);
+  }
+
+  return {
+    strToB64: codeTrans.bind(null, utf8, base64),
+    b64ToStr: codeTrans.bind(null, base64, utf8),
+  };
+})();
+
 describe('usage cryptico', () => {
   let cryptico = null,
       aRSAkey = null,
       publicKeyString = null,
       encText = null;
   const plainText = '茶色い狐がのろまな犬を飛び越えた。';
-  //const plainText = 'irohaniwoedochirinuruo';
 
   it('load module',() => {
     cryptico = require('cryptico');
@@ -35,9 +48,7 @@ describe('usage cryptico', () => {
   });
 
   it('暗号化',()=>{
-    const buff = new Buffer(plainText, 'utf8');
-    const b64PlainText = buff.toString('base64');
-
+    const b64PlainText = transStrCode.strToB64(plainText);
     const encObj = cryptico.encrypt(b64PlainText, publicKeyString);
 
     if (encObj.status === 'success') {
@@ -54,27 +65,28 @@ describe('usage cryptico', () => {
 
     if (decObj.status === 'success') {
       expect(decObj.signature).is.equal('unsigned');
-      const buff = new Buffer(decObj.plaintext, 'base64');
+      const decPlainText = transStrCode.b64ToStr(decObj.plaintext);
 
-      expect(buff.toString('utf8')).is.equal(plainText);
+      expect(decPlainText).is.equal(plainText);
 
       return;
     }
     throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
   });
 
-  it('署名',()=>{
+  it.pass('署名',()=>{
     const passPhrase ='other key',
           bits = 1024,
           otherRkey = cryptico.generateRSAKey(passPhrase, bits),
           otherPKey = cryptico.publicKeyString(otherRkey);
 
     const signedEncObj = cryptico.encrypt(plainText,publicKeyString,otherRkey);
-    console.log(signedEncObj);
+    //console.log(signedEncObj);
 
-    const decObj = cryptico.decrypt(signedEncObj.cipher, publicKeyString, otherPKey);
+    const decObj = cryptico.decrypt(signedEncObj.cipher, aRSAkey, otherPKey);
+
+    //eslint-disable-next-line no-console
     console.log(decObj);
-
 
   });
 });
