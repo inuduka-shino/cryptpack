@@ -1,5 +1,6 @@
 /*eslint-env node, mocha */
 /*eslint global-require:0 */
+
 const expect = require('chai').expect;
 // ref: http://blog.verygoodtown.com/2011/09/generating-an-rsa-key-pair-public-key-string/
 
@@ -74,7 +75,7 @@ describe('usage cryptico', () => {
     throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
   });
 
-  it.pass('署名',()=>{
+  it.skip('署名',()=>{
     const passPhrase ='other key',
           bits = 1024,
           otherRkey = cryptico.generateRSAKey(passPhrase, bits),
