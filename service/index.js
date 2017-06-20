@@ -9,9 +9,16 @@ const path = require('path'),
 const app = new Koa();
 
 // static resource
-app.use(serv(path.join(__dirname, 'static/'), {
-  index: 'main.html',
-  extensions: ['html']
-}));
+app.use(async (ctx, next) => {
+  console.log(`ctx.request.path = ${ctx.request.path}`);
+  const servFnc = serv(
+                  path.join(__dirname, 'static/'), {
+                    index: 'main.html',
+                    extensions: ['html']
+                  }
+                );
+
+  await servFnc(ctx, next);
+});
 
 module.exports = app;

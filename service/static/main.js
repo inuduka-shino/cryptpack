@@ -36,6 +36,7 @@ const $ = (()=>{
 
   console.log('LoadedDoccument');
   const $msg = $('message');
+  const typeOfCryptico = typeof cryptico;
 
-  $msg.text('ready.');
+  $msg.text(`cryptico is ${typeOfCryptico}`);
 })();
