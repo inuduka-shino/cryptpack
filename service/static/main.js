@@ -44,7 +44,8 @@ const $ = (()=>{
 
   console.log('LoadedDoccument');
   const $msg = $('message'),
-        $pubKey = $('publicKeyString');
+        $pubKey = $('publicKeyString'),
+        $encText = $('encText');
 
   $msg.text('ready.');
   const typeOfCryptico = typeof cryptico;
@@ -62,5 +63,15 @@ const $ = (()=>{
 
   $msg.addText('publicKeyString generated.');
   $pubKey.text(publicKeyString);
+
+  const encObj = cryptico.encrypt('abcd efg', publicKeyString);
+
+  if (encObj.status !== 'success') {
+    throw new Error(`cryptico.encrypt error!(status=${encObj.status})`);
+  }
+
+  const encText = encObj.cipher;
+  $encText.text(encText);
+
 
 })();
