@@ -45,7 +45,8 @@ const $ = (()=>{
   console.log('LoadedDoccument');
   const $msg = $('message'),
         $pubKey = $('publicKeyString'),
-        $encText = $('encText');
+        $encText = $('encText'),
+        $decText = $('decText');
 
   $msg.text('ready.');
   const typeOfCryptico = typeof cryptico;
@@ -71,7 +72,15 @@ const $ = (()=>{
   }
 
   const encText = encObj.cipher;
+
   $encText.text(encText);
 
+  const decObj = cryptico.decrypt(encText, aRSAkey);
+
+  if (decObj.status !== 'success') {
+    throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+  }
+
+  $decText.text(decObj.plaintext);
 
 })();
