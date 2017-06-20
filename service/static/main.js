@@ -1,6 +1,6 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global Promise */
+/*global Promise, cryptico */
 
 function checkLoadedDocument() {
   return new Promise((resolve) => {
@@ -14,16 +14,24 @@ function checkLoadedDocument() {
 
 const $ = (()=>{
   const id=document.getElementById.bind(document);
+  let messageText = '';
 
   function text($elm, txt) {
-    $elm.textContent = txt;
+    messageText = txt;
+    $elm.textContent = messageText;
+  }
+  function addText($elm, txt) {
+    messageText += '  ';
+    messageText += txt;
+    $elm.textContent = messageText;
   }
 
   return (idStr) => {
     const $elm = id(idStr);
 
     return {
-      text: text.bind(null, $elm)
+      text: text.bind(null, $elm),
+      addText: addText.bind(null, $elm),
     };
   };
 })();
@@ -35,8 +43,24 @@ const $ = (()=>{
         ]);
 
   console.log('LoadedDoccument');
-  const $msg = $('message');
+  const $msg = $('message'),
+        $pubKey = $('publicKeyString');
+
+  $msg.text('ready.');
   const typeOfCryptico = typeof cryptico;
 
-  $msg.text(`cryptico is ${typeOfCryptico}`);
+  $msg.addText(`cryptico is ${typeOfCryptico}.`);
+
+  const passPhrase ='same word. ex.abcdefg',
+        bits = 1024;
+
+  const aRSAkey = cryptico.generateRSAKey(passPhrase, bits);
+
+  $msg.addText(`RSAkey is ${typeof aRSAkey}.`);
+
+  const publicKeyString = cryptico.publicKeyString(aRSAkey);
+
+  $msg.addText('publicKeyString generated.');
+  $pubKey.text(publicKeyString);
+
 })();
