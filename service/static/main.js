@@ -14,24 +14,37 @@ function checkLoadedDocument() {
 
 const $ = (()=>{
   const id=document.getElementById.bind(document);
-  let messageText = '';
 
-  function text($elm, txt) {
-    messageText = txt;
-    $elm.textContent = messageText;
+  function text(self, txt) {
+    self.text = txt;
+    self.$.textContent = self.text;
   }
-  function addText($elm, txt) {
-    messageText += '  ';
-    messageText += txt;
-    $elm.textContent = messageText;
+  function addText(self, txt) {
+    self.text += txt;
+    self.$.textContent = self.text;
+  }
+  function addClass(self, className) {
+    self.$.classList.add(className);
+  }
+  function removeClass(self, className) {
+    self.$.classList.remove(className);
+  }
+  function on(self, eventName, eventHandler) {
+    self.$.addEventListener(eventName, eventHandler);
   }
 
   return (idStr) => {
-    const $elm = id(idStr);
+    const domInfo = {
+      $: id(idStr),
+      text: null,
+    };
 
     return {
-      text: text.bind(null, $elm),
-      addText: addText.bind(null, $elm),
+      text: text.bind(null, domInfo),
+      addText: addText.bind(null, domInfo),
+      addClass: addClass.bind(null, domInfo),
+      removeClass: removeClass.bind(null, domInfo),
+      on: on.bind(null, domInfo),
     };
   };
 })();
@@ -49,38 +62,41 @@ const $ = (()=>{
         $decText = $('decText');
 
   $msg.text('ready.');
-  const typeOfCryptico = typeof cryptico;
+  const $button= $('cryptoTestButton');
 
-  $msg.addText(`cryptico is ${typeOfCryptico}.`);
+  $button.on('click',() => {
+    const typeOfCryptico = typeof cryptico;
 
-  const passPhrase ='same word. ex.abcdefg',
-        bits = 1024;
+    $msg.addText(`cryptico is ${typeOfCryptico}.`);
 
-  const aRSAkey = cryptico.generateRSAKey(passPhrase, bits);
+    const passPhrase ='same word. ex.abcdefg',
+          bits = 1024;
 
-  $msg.addText(`RSAkey is ${typeof aRSAkey}.`);
+    const aRSAkey = cryptico.generateRSAKey(passPhrase, bits);
 
-  const publicKeyString = cryptico.publicKeyString(aRSAkey);
+    $msg.addText(`RSAkey is ${typeof aRSAkey}.`);
 
-  $msg.addText('publicKeyString generated.');
-  $pubKey.text(publicKeyString);
+    const publicKeyString = cryptico.publicKeyString(aRSAkey);
 
-  const encObj = cryptico.encrypt('abcd efg', publicKeyString);
+    $msg.addText('publicKeyString generated.');
+    $pubKey.text(publicKeyString);
 
-  if (encObj.status !== 'success') {
-    throw new Error(`cryptico.encrypt error!(status=${encObj.status})`);
-  }
+    const encObj = cryptico.encrypt('abcd efg', publicKeyString);
 
-  const encText = encObj.cipher;
+    if (encObj.status !== 'success') {
+      throw new Error(`cryptico.encrypt error!(status=${encObj.status})`);
+    }
 
-  $encText.text(encText);
+    const encText = encObj.cipher;
 
-  const decObj = cryptico.decrypt(encText, aRSAkey);
+    $encText.text(encText);
 
-  if (decObj.status !== 'success') {
-    throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
-  }
+    const decObj = cryptico.decrypt(encText, aRSAkey);
 
-  $decText.text(decObj.plaintext);
+    if (decObj.status !== 'success') {
+      throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+    }
 
+    $decText.text(decObj.plaintext);
+  });
 })();
