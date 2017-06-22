@@ -4,6 +4,7 @@
 /*global mdls */
 
 mdls('domUtil',()=>{
+
   function checkLoadedDocument() {
     return new Promise((resolve) => {
       if (document.readyState === 'loading') {
@@ -14,7 +15,9 @@ mdls('domUtil',()=>{
     });
   }
 
-
+  function on(self, eventName, eventHandler) {
+    self.dom.addEventListener(eventName, eventHandler);
+  }
   function text(self, txt) {
     self.text = txt;
     self.dom.textContent = self.text;
@@ -29,30 +32,28 @@ mdls('domUtil',()=>{
   function removeClass(self, className) {
     self.dom.classList.remove(className);
   }
-  function on(self, eventName, eventHandler) {
-    self.dom.addEventListener(eventName, eventHandler);
+
+  function genElm(domElm) {
+    const domInfo = {
+      dom: domElm,
+      text: null,
+    };
+
+    return {
+      dom: domInfo.dom,
+      on: on.bind(null, domInfo),
+
+      text: text.bind(null, domInfo),
+      addText: addText.bind(null, domInfo),
+      addClass: addClass.bind(null, domInfo),
+
+      removeClass: removeClass.bind(null, domInfo),
+    };
   }
 
-  const $ = (()=>{
-    const id=document.getElementById.bind(document);
-
-    return (idStr) => {
-      const domInfo = {
-        dom: id(idStr),
-        text: null,
-      };
-
-      return {
-        dom: domInfo.dom,
-        text: text.bind(null, domInfo),
-        addText: addText.bind(null, domInfo),
-        addClass: addClass.bind(null, domInfo),
-        removeClass: removeClass.bind(null, domInfo),
-        on: on.bind(null, domInfo),
-      };
-    };
-  })();
-
+  function $(idStr) {
+    return genElm(document.getElementById(idStr));
+  }
 
   return {
     $,
