@@ -17,20 +17,20 @@ mdls('domUtil',()=>{
 
   function text(self, txt) {
     self.text = txt;
-    self.$.textContent = self.text;
+    self.dom.textContent = self.text;
   }
   function addText(self, txt) {
     self.text += txt;
-    self.$.textContent = self.text;
+    self.dom.textContent = self.text;
   }
   function addClass(self, className) {
-    self.$.classList.add(className);
+    self.dom.classList.add(className);
   }
   function removeClass(self, className) {
-    self.$.classList.remove(className);
+    self.dom.classList.remove(className);
   }
   function on(self, eventName, eventHandler) {
-    self.$.addEventListener(eventName, eventHandler);
+    self.dom.addEventListener(eventName, eventHandler);
   }
 
   const $ = (()=>{
@@ -38,11 +38,12 @@ mdls('domUtil',()=>{
 
     return (idStr) => {
       const domInfo = {
-        $: id(idStr),
+        dom: id(idStr),
         text: null,
       };
 
       return {
+        dom: domInfo.dom,
         text: text.bind(null, domInfo),
         addText: addText.bind(null, domInfo),
         addClass: addClass.bind(null, domInfo),
