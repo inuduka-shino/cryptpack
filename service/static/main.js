@@ -1,118 +1,30 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global Promise, cryptico */
+/*global Promise, mdls */
 
-function checkLoadedDocument() {
-  return new Promise((resolve) => {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', resolve);
-    } else {
-      resolve();
-    }
-  });
-}
+mdls('Main', async (mdls)=>{
+    const $ = mdls.domUtil.$;
 
-const $ = (()=>{
-  const id=document.getElementById.bind(document);
+    await Promise.all([
+            mdls.domUtil.checkLoadedDocument(),
+          ]);
 
-  function text(self, txt) {
-    self.text = txt;
-    self.$.textContent = self.text;
-  }
-  function addText(self, txt) {
-    self.text += txt;
-    self.$.textContent = self.text;
-  }
-  function addClass(self, className) {
-    self.$.classList.add(className);
-  }
-  function removeClass(self, className) {
-    self.$.classList.remove(className);
-  }
-  function on(self, eventName, eventHandler) {
-    self.$.addEventListener(eventName, eventHandler);
-  }
+    console.log('LoadedDoccument');
+    const $msg = $('message');
 
-  return (idStr) => {
-    const domInfo = {
-      $: id(idStr),
-      text: null,
-    };
+    $msg.text('ready.');
+    const $button= $('cryptoTestButton');
 
-    return {
-      text: text.bind(null, domInfo),
-      addText: addText.bind(null, domInfo),
-      addClass: addClass.bind(null, domInfo),
-      removeClass: removeClass.bind(null, domInfo),
-      on: on.bind(null, domInfo),
-    };
-  };
-})();
+    const dispInfo = {
+            $msg,
+            $pubKey: $('publicKeyString'),
+            $encText: $('encText'),
+            $decText: $('decText'),
+          },
+          $cryptoTest = $('cryptotest');
 
-//eslint-disable-next-line max-statements
-function cryptoTest(list$) {
-  const $msg = list$.$msg,
-        $pubKey = list$.$pubKey,
-        $encText = list$.$encText,
-        $decText = list$.$decText;
-
-  const typeOfCryptico = typeof cryptico;
-
-  $msg.addText(`cryptico is ${typeOfCryptico}.`);
-
-  const passPhrase ='same word. ex.abcdefg',
-        bits = 1024;
-
-  const aRSAkey = cryptico.generateRSAKey(passPhrase, bits);
-
-  $msg.addText(`RSAkey is ${typeof aRSAkey}.`);
-
-  const publicKeyString = cryptico.publicKeyString(aRSAkey);
-
-  $msg.addText('publicKeyString generated.');
-  $pubKey.text(publicKeyString);
-
-  const encObj = cryptico.encrypt('abcd efg', publicKeyString);
-
-  if (encObj.status !== 'success') {
-    throw new Error(`cryptico.encrypt error!(status=${encObj.status})`);
-  }
-
-  const encText = encObj.cipher;
-
-  $encText.text(encText);
-
-  const decObj = cryptico.decrypt(encText, aRSAkey);
-
-  if (decObj.status !== 'success') {
-    throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
-  }
-
-  $decText.text(decObj.plaintext);
-
-}
-
-(async () => {
-  await Promise.all([
-          checkLoadedDocument(),
-        ]);
-
-  console.log('LoadedDoccument');
-  const $msg = $('message');
-
-  $msg.text('ready.');
-  const $button= $('cryptoTestButton');
-
-  const dispInfo = {
-          $msg,
-          $pubKey: $('publicKeyString'),
-          $encText: $('encText'),
-          $decText: $('decText'),
-        },
-        $cryptoTest = $('cryptotest');
-
-  $button.on('click',() =>{
-    $cryptoTest.removeClass('hide');
-    cryptoTest(dispInfo);
-  });
-})();
+    $button.on('click',() =>{
+      $cryptoTest.removeClass('hide');
+      mdls.cryptoTest(dispInfo);
+    });
+});
