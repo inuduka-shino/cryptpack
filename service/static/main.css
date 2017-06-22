@@ -4,3 +4,7 @@
 h1.title {
   margin-top: 0pt;
 }
+
+.hide{
+  display: none;
+}
