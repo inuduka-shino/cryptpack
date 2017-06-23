@@ -23,6 +23,12 @@ mdls('Main', async (mdls)=>{
           },
           $cryptoTest = $('cryptotest');
 
+    fetch('./cx/').then((res) => {
+      return res.json();
+    })
+    .then((data)=>{
+      $msg.text(`fetch ./cx/:${data.status}`);
+    });
     $button.on('click',() =>{
       $cryptoTest.removeClass('hide');
       mdls.cryptoTest(dispInfo);
