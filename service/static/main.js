@@ -1,12 +1,13 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global Promise, mdls */
+/*global Promise , define */
 
-mdls('Main', async (mdls)=>{
-    const $ = mdls.domUtil.$;
+define(['domUtil','cryptoTest'], (domUtil, cryptoTest) => {
+  (async () => {
+    const $ = domUtil.$;
 
     await Promise.all([
-            mdls.domUtil.checkLoadedDocument(),
+            domUtil.checkLoadedDocument(),
           ]);
 
     console.log('LoadedDoccument');
@@ -31,6 +32,7 @@ mdls('Main', async (mdls)=>{
     });
     $button.on('click',() =>{
       $cryptoTest.removeClass('hide');
-      mdls.cryptoTest(dispInfo);
+      cryptoTest(dispInfo);
     });
+  })();
 });

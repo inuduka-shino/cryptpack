@@ -1,10 +1,9 @@
 /* domUtil.js */
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global mdls */
+/*global define */
 
-mdls('domUtil',()=>{
-
+define(()=>{
   function checkLoadedDocument() {
     return new Promise((resolve) => {
       if (document.readyState === 'loading') {

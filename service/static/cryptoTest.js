@@ -1,9 +1,9 @@
 /* cryptoTest.js */
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global mdls, cryptico */
+/*global define, cryptico */
 
-mdls('cryptoTest', () =>{
+define(() =>{
   //eslint-disable-next-line max-statements
   return function (list$) {
     const $msg = list$.$msg,
