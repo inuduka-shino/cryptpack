@@ -13,7 +13,13 @@ define(['domUtil','cryptoTest'], (domUtil, cryptoTest) => {
     console.log('LoadedDoccument');
     const $msg = $('message');
 
-    $msg.text('ready.');
+    function msg(msgtxt) {
+      $msg.text(msgtxt);
+      console.log(msgtxt);
+    }
+
+    msg('ready.');
+
     const $button= $('cryptoTestButton');
 
     const dispInfo = {
@@ -24,12 +30,15 @@ define(['domUtil','cryptoTest'], (domUtil, cryptoTest) => {
           },
           $cryptoTest = $('cryptotest');
 
-    fetch('./cx/').then((res) => {
-      return res.json();
-    })
-    .then((data)=>{
-      $msg.text(`fetch ./cx/:${data.status}`);
+    $('genRSAKeyButton').on('click',() =>{
+      fetch('./cx/getRandSeed').then((res) => {
+        return res.json();
+      })
+      .then((data)=>{
+        msg(`fetch ./cx/:${data.status}`);
+      });
     });
+
     $button.on('click',() =>{
       $cryptoTest.removeClass('hide');
       cryptoTest(dispInfo);

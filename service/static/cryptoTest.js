@@ -4,6 +4,8 @@
 /*global define, cryptico */
 
 define(() =>{
+  //const cryptico = require('./lib/cryptico.min');
+
   //eslint-disable-next-line max-statements
   return function (list$) {
     const $msg = list$.$msg,
