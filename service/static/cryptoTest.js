@@ -3,7 +3,7 @@
 /*eslint no-console: off */
 /*global define, cryptico */
 
-define(() =>{
+define(['base64Util'], (base64Util) =>{
   //const cryptico = require('./lib/cryptico.min');
 
   //eslint-disable-next-line max-statements
@@ -29,7 +29,11 @@ define(() =>{
     $msg.addText('publicKeyString generated.');
     $pubKey.text(publicKeyString);
 
-    const encObj = cryptico.encrypt('abcd efg', publicKeyString);
+    const plaintext = 'あいうえお';
+    const encObj = cryptico.encrypt(
+      base64Util.encode(plaintext),
+      publicKeyString
+    );
 
     if (encObj.status !== 'success') {
       throw new Error(`cryptico.encrypt error!(status=${encObj.status})`);
@@ -45,6 +49,6 @@ define(() =>{
       throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
     }
 
-    $decText.text(decObj.plaintext);
+    $decText.text(base64Util.decode(decObj.plaintext));
   };
 });
