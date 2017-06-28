@@ -31,7 +31,13 @@ define(['domUtil','cryptoTest'], (domUtil, cryptoTest) => {
           $cryptoTest = $('cryptotest');
 
     $('genRSAKeyButton').on('click',() =>{
-      fetch('./cx/getRandSeed').then((res) => {
+      fetch('./cx/getRandSeed',{
+        method: 'POST',
+        headers: (new Headers()).append('Content-Type', 'application/json'),
+        body: JSON.stringify({
+            key: 'abcd'
+        })
+      }).then((res) => {
         return res.json();
       })
       .then((data)=>{

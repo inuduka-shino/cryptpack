@@ -6,17 +6,38 @@ const path = require('path'),
       Koa = require('koa'),
       serv = require('koa-static');
 
+const cxServices = require('./cxService');
 const app = new Koa();
 
-// static resource
+const commandPrefix = '/cx/',
+      commandPrefixLen = commandPrefix.length;
+
+//eslint-disable-next-line max-statements
 app.use(async (ctx, next) => {
-  console.log(`ctx.request.path = ${ctx.request.path}`);
-  if (ctx.request.path.startsWith('/cx/')) {
+  //console.log(`ctx.request.path = ${ctx.request.path}`);
+  if (ctx.request.path.startsWith(commandPrefix)) {
     ctx.response.status = 200;
     ctx.response.set('Content-Type','application/json');
-    //const date = (new Date()).toString();
-    ctx.response.body = '{"status":"ok"}';
+    try {
+      const valPromise = cxServices(ctx.request.path.slice(commandPrefixLen), ctx.request);
+      let val=null;
 
+      if (valPromise.then) {
+        val = await valPromise;
+      } else {
+        val = valPromise;
+      }
+      ctx.response.body = {
+        status:'ok',
+        val
+      };
+    } catch (e) {
+      ctx.response.body = {
+        status:'error',
+        message: e.message,
+        error: e
+      };
+    }
   } else {
     const servFnc = serv(
             path.join(__dirname, 'static/'), {
