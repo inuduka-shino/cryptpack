@@ -2,10 +2,14 @@
 /*eslint no-console: off */
 /*global Promise , define */
 
-define(['domUtil','cryptoTest'], (domUtil, cryptoTest) => {
-  (async () => {
-    const $ = domUtil.$;
+define((require) => {
+  const domUtil = require('./domUtil'),
+        cryptoTest = require('./cryptoTest'),
+        cx = require('./cx');
 
+  const $ = domUtil.$;
+
+  (async () => {
     await Promise.all([
             domUtil.checkLoadedDocument(),
           ]);
@@ -31,18 +35,11 @@ define(['domUtil','cryptoTest'], (domUtil, cryptoTest) => {
           $cryptoTest = $('cryptotest');
 
     $('genRSAKeyButton').on('click',() =>{
-      fetch('./cx/getRandSeed',{
-        method: 'POST',
-        headers: (new Headers()).append('Content-Type', 'application/json'),
-        body: JSON.stringify({
-            key: 'abcd'
-        })
-      }).then((res) => {
-        return res.json();
-      })
-      .then((data)=>{
-        msg(`fetch ./cx/:${data.status}`);
-      });
+      cx.getRandSeed()
+        .then((seed)=>{
+          msg('fetch ./cx/:ok');
+          console.log(seed);
+        });
     });
 
     $button.on('click',() =>{

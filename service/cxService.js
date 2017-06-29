@@ -2,13 +2,19 @@
 /*eslint-env node */
 /*eslint no-console: off */
 
+const crypto=require('crypto');
 
-function getRandSeed(req) {
-    console.log(req.body);
-
-    return {
-      seed: 'test'
-    };
+function getRandSeed() {
+    return new Promise((resolve, reject)=>{
+      crypto.randomBytes(1024,(err, buff) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(
+          buff
+        );
+      });
+    });
 }
 
 function services(command ,req) {

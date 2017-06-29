@@ -3,8 +3,9 @@
 /*eslint no-console: off */
 /*global define, cryptico */
 
-define(['base64Util'], (base64Util) =>{
+define((require) =>{
   //const cryptico = require('./lib/cryptico.min');
+  const base64Util = require('base64Util');
 
   //eslint-disable-next-line max-statements
   return function (list$) {

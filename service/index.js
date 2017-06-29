@@ -16,6 +16,7 @@ const commandPrefix = '/cx/',
 app.use(async (ctx, next) => {
   //console.log(`ctx.request.path = ${ctx.request.path}`);
   if (ctx.request.path.startsWith(commandPrefix)) {
+    //TODO body parse
     ctx.response.status = 200;
     ctx.response.set('Content-Type','application/json');
     try {
