@@ -22,12 +22,20 @@ define(() =>{
       throw new Error(resObj.message);
     });
   }
+  function dummy(retVal) {
+    return () =>{
+        return new Promise((resolve)=>{
+          resolve(retVal);
+        });
+    };
+  }
 
   return {
     getRandSeed () {
-      return cxCommand('getRandSeed').then((ret) => {
-        return ret.data;
-      });
-    }
+      return cxCommand('getRandSeed');
+    },
+    regPubKey: dummy('DUMMYID001'),
+    getTestMessage: dummy('dummyMessage'),
+
   };
 });

@@ -1,6 +1,6 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global Promise , define */
+/*global Promise , define, cryptico */
 
 define((require) => {
   const domUtil = require('./domUtil'),
@@ -8,6 +8,28 @@ define((require) => {
         cx = require('./cx');
 
   const $ = domUtil.$;
+
+  async function registSecKey() {
+    const bits = 1024;
+
+    // 乱数取得
+    const seed = await cx.getRandSeed();
+
+    // key作成
+    const aRSAkey = cryptico.generateRSAKey(seed, bits);
+    const publicKeyString = cryptico.publicKeyString(aRSAkey);
+
+    // サービス登録
+    const keyId = await cx.regPubKey(publicKeyString);
+
+    // db 保管
+    return keyId;
+  }
+  async function getTestMessage(reqId) {
+    const plaintext = await cx.getTestMessage(reqId);
+
+    return plaintext;
+  }
 
   (async () => {
     await Promise.all([
@@ -34,13 +56,21 @@ define((require) => {
           },
           $cryptoTest = $('cryptotest');
 
-    $('genRSAKeyButton').on('click',() =>{
-      cx.getRandSeed()
-        .then((seed)=>{
-          msg('fetch ./cx/:ok');
-          console.log(seed);
+    $('genRSAKeyButton').on(
+      'click',
+      () => {
+      msg('start gen sec key...');
+        registSecKey()
+        .then((regId)=>{
+          msg('generated sec key !');
+
+          return getTestMessage(regId);
+        })
+        .then((plaintext)=>{
+          msg(`message is [${plaintext}]`);
         });
-    });
+      }
+    );
 
     $button.on('click',() =>{
       $cryptoTest.removeClass('hide');
