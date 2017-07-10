@@ -4,18 +4,28 @@
 
 const path = require('path'),
       Koa = require('koa'),
+      Router = require('koa-router'),
       serv = require('koa-static');
 
 const cxServices = require('./cxService');
 const app = new Koa();
+const router = new Router();
 
 const commandPrefix = '/cx/',
       commandPrefixLen = commandPrefix.length;
 
-//eslint-disable-next-line max-statements
-app.use(async (ctx, next) => {
-  //console.log(`ctx.request.path = ${ctx.request.path}`);
+router.get(/^\/test$/, (ctx) => {
+  ctx.response.status = 200;
+  ctx.response.body = 'test';
+  //ctx.redirect('/');
+  //await nextx();
+});
+
+
+router.post(/.*/, async (ctx, next) => {
+  console.log(`ctx.request.path = ${ctx.request.path}`);
   if (ctx.request.path.startsWith(commandPrefix)) {
+    console.log('CXコマンド処理');
     //TODO body parse
     ctx.response.status = 200;
     ctx.response.set('Content-Type','application/json');
@@ -40,6 +50,7 @@ app.use(async (ctx, next) => {
       };
     }
   } else {
+    console.log('static');
     const servFnc = serv(
             path.join(__dirname, 'static/'), {
               index: 'main.html',
@@ -50,5 +61,20 @@ app.use(async (ctx, next) => {
     await servFnc(ctx, next);
   }
 });
+
+router.get(/.*/, serv(
+  path.join(__dirname, 'static/'), {
+    index: 'main.html',
+    extensions: ['html']
+  }
+));
+
+app
+.use(async (ctx, nextx) => {
+  console.log(`app.use: ${ctx.request.path}`);
+  await nextx();
+})
+.use(router.routes())
+.use(router.allowedMethods());
 
 module.exports = app;

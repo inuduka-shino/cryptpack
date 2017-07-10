@@ -1,1 +1,2 @@
-/service/static/lib/*
+/node_modules/
+/service/static/lib/

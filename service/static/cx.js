@@ -13,7 +13,10 @@ define(() =>{
         body: JSON.stringify(body)
     })
     .then((res) => {
-      return res.json();
+      if (res.status === 200) {
+        return res.json();
+      }
+      throw new Error(`response status (${res.status}): ${res.message}`);
     })
     .then((resObj) => {
       if (resObj.status === 'ok') {
@@ -22,11 +25,17 @@ define(() =>{
       throw new Error(resObj.message);
     });
   }
-  function dummy(retVal) {
-    return () =>{
-        return new Promise((resolve)=>{
-          resolve(retVal);
+  function dummy(cmd, retVal) {
+    return async function () {
+      try {
+        const ret = await cxCommand(cmd, {
+          dummy:'dummy'
         });
+
+        return ret;
+      } catch (err) {
+        return retVal;
+      }
     };
   }
 
@@ -34,8 +43,8 @@ define(() =>{
     getRandSeed () {
       return cxCommand('getRandSeed');
     },
-    regPubKey: dummy('DUMMYID001'),
-    getTestMessage: dummy('dummyMessage'),
+    regPubKey: dummy('regPubKey','DUMMYID001'),
+    getTestMessage: dummy('getTestMessage','dummyMessage'),
 
   };
 });
