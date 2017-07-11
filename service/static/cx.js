@@ -5,11 +5,15 @@
 
 define(() =>{
   function cxCommand(commandName, body) {
+    const headers = new Headers();
+
+    headers.append('Content-Type', 'application/json');
+
     return fetch(
-      './cx/' + commandName,
+      `./cx/${commandName}`,
       {
         method: 'POST',
-        headers: (new Headers()).append('Content-Type', 'application/json'),
+        headers,
         body: JSON.stringify(body)
     })
     .then((res) => {

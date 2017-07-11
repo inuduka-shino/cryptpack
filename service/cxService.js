@@ -53,11 +53,13 @@ function getRandSeed() {
     });
 }
 
-function services(command ,req) {
+function services(command ,reqVal) {
   if (command==='getRandSeed') {
-    return getRandSeed(req);
+    return getRandSeed();
   }
-  throw new Error('unkown command.');
+  console.log(`unkown command.[${command}]`);
+  console.log(reqVal);
+  throw new Error(`unkown command.[${command}]`);
 }
 
 module.exports = services;
