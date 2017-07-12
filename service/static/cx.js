@@ -59,8 +59,13 @@ define(() =>{
           publicKeyString
         });
       },
-      getTestMessage: dummy('getTestMessage','dummyMessage'),
-
+      getTestMessage(clientId, testNum) {
+        return cxCommand('getTestMessage',{
+          clientId,
+          testNum
+        });
+      },
+      dummy: dummy('dummy','dummyMessage'),
     };
   }
 

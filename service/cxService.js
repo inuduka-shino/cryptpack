@@ -2,7 +2,9 @@
 /*eslint-env node */
 /*eslint no-console: off */
 
-const crypto=require('crypto');
+const crypto=require('crypto'),
+      cryptico = require('cryptico');
+
 const transMap = {
   true: {
     alpha:  'A'.charCodeAt(),
@@ -48,8 +50,17 @@ const clientManager = (function () {
     return clientId;
   }
 
+  function getClient(clientId) {
+    return {
+      publicKeyString () {
+        return clientMap[clientId];
+      }
+    };
+  }
+
   return {
-    registClient
+    registClient,
+    getClient
   };
 }());
 
@@ -78,12 +89,48 @@ function regPubKey(reqVal) {
   });
 }
 
+const testMessage = [
+  'abc',
+  'def',
+  'あいう'
+];
+
+function getTestMessage(reqVal) {
+  const publicKeyString = clientManager
+        .getClient(reqVal.clientId)
+        .publicKeyString();
+
+  const plaintext = testMessage[reqVal.testNum];
+
+  console.log('plaintext');
+  console.log(plaintext);
+
+  return new Promise((resolve, reject)=>{
+    //const b64PlainText = transStrCode.strToB64(plaintext)
+    const encObj = cryptico.encrypt(plaintext, publicKeyString);
+
+    if (encObj.status === 'success') {
+      resolve(encObj.cipher);
+      console.log('publicKeyString');
+      console.log(publicKeyString);
+      console.log('encObj.cipher');
+      console.log(encObj.cipher);
+
+      return;
+    }
+    reject(new Error(`cryptico encrypt Error: bad status ${encObj.status}`));
+  });
+}
+
 function services(command ,reqVal) {
   if (command==='getRandSeed') {
     return getRandSeed();
   }
   if (command==='regPubKey') {
     return regPubKey(reqVal);
+  }
+  if (command==='getTestMessage') {
+    return getTestMessage(reqVal);
   }
   console.log(`unkown command.[${command}]`);
   console.log(reqVal);
