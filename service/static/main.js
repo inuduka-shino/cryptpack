@@ -5,8 +5,12 @@
 define((require) => {
   const domUtil = require('./domUtil'),
         cryptoTest = require('./cryptoTest'),
-        cx = require('./cx');
+        cxMng = require('./cx');
 
+  let theRSAKey = null;
+
+
+  const cx = cxMng();
   const $ = domUtil.$;
 
   async function registSecKey() {
@@ -20,13 +24,15 @@ define((require) => {
     const publicKeyString = cryptico.publicKeyString(aRSAkey);
 
     // サービス登録
-    const keyId = await cx.regPubKey(publicKeyString);
+    const clientId = await cx.regPubKey(publicKeyString);
 
     // db 保管
-    return keyId;
+    theRSAKey = aRSAkey;
+
+    return clientId;
   }
-  async function getTestMessage(reqId) {
-    const plaintext = await cx.getTestMessage(reqId);
+  async function getTestMessage(reqId, testNum) {
+    const plaintext = await cx.getTestMessage(reqId, testNum);
 
     return plaintext;
   }
@@ -64,9 +70,23 @@ define((require) => {
         .then((regId)=>{
           msg('generated sec key !');
 
-          return getTestMessage(regId);
+          return Promise.all([
+            getTestMessage(regId, 0),
+            getTestMessage(regId, 1)
+          ]);
         })
-        .then((plaintext)=>{
+        .then((enctexts)=>{
+          const plaintext = enctexts.map((enctext) => {
+            const decObj = cryptico.decrypt(enctext, theRSAKey);
+
+            if (decObj.status !== 'success') {
+              throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+            }
+
+            //$decText.text(base64Util.decode(decObj.plaintext));
+            return decObj.plaintext;
+          }).join(':');
+
           msg(`message is [${plaintext}]`);
         });
       }

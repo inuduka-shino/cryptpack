@@ -4,13 +4,15 @@
 /*global define */
 
 define(() =>{
+  let baseUrl = './cx';
+
   function cxCommand(commandName, body) {
     const headers = new Headers();
 
     headers.append('Content-Type', 'application/json');
 
     return fetch(
-      `./cx/${commandName}`,
+      [baseUrl, commandName].join('/'),
       {
         method: 'POST',
         headers,
@@ -43,12 +45,29 @@ define(() =>{
     };
   }
 
-  return {
-    getRandSeed () {
-      return cxCommand('getRandSeed');
-    },
-    regPubKey: dummy('regPubKey','DUMMYID001'),
-    getTestMessage: dummy('getTestMessage','dummyMessage'),
+  function cxMng(baseUrl0=null) {
+    if (baseUrl0 !== null) {
+      baseUrl = baseUrl0;
+    }
 
-  };
+    return {
+      getRandSeed () {
+        return cxCommand('getRandSeed');
+      },
+      regPubKey(publicKeyString) {
+        return cxCommand('regPubKey',{
+          publicKeyString
+        });
+      },
+      getTestMessage(clientId, testNum) {
+        return cxCommand('getTestMessage',{
+          clientId,
+          testNum
+        });
+      },
+      dummy: dummy('dummy','dummyMessage'),
+    };
+  }
+
+  return cxMng;
 });
