@@ -5,8 +5,10 @@
 define((require) => {
   const domUtil = require('./domUtil'),
         cryptoTest = require('./cryptoTest'),
-        cx = require('./cx');
+        cxMng = require('./cx');
 
+
+  const cx = cxMng();
   const $ = domUtil.$;
 
   async function registSecKey() {
@@ -20,10 +22,10 @@ define((require) => {
     const publicKeyString = cryptico.publicKeyString(aRSAkey);
 
     // サービス登録
-    const keyId = await cx.regPubKey(publicKeyString);
+    const clientId = await cx.regPubKey(publicKeyString);
 
     // db 保管
-    return keyId;
+    return clientId;
   }
   async function getTestMessage(reqId) {
     const plaintext = await cx.getTestMessage(reqId);
