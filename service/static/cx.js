@@ -54,7 +54,11 @@ define(() =>{
       getRandSeed () {
         return cxCommand('getRandSeed');
       },
-      regPubKey: dummy('regPubKey','DUMMYID001'),
+      regPubKey(publicKeyString) {
+        return cxCommand('regPubKey',{
+          publicKeyString
+        });
+      },
       getTestMessage: dummy('getTestMessage','dummyMessage'),
 
     };

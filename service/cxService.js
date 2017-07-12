@@ -37,6 +37,22 @@ function trans(binArray) {
   });
 }
 
+const clientManager = (function () {
+  const clientMap = {};
+
+  function registClient(publicKeyString) {
+    const clientId = 'ASS001CL001';
+
+    clientMap[clientId] = publicKeyString;
+
+    return clientId;
+  }
+
+  return {
+    registClient
+  };
+}());
+
 function getRandSeed() {
     return new Promise((resolve, reject)=>{
       crypto.randomBytes(1024,(err, buff) => {
@@ -52,10 +68,22 @@ function getRandSeed() {
       });
     });
 }
+function regPubKey(reqVal) {
+  const publicKeyString = reqVal.publicKeyString;
+
+  return new Promise((resolve)=>{
+    const clientId =clientManager.registClient(publicKeyString);
+
+    resolve(clientId);
+  });
+}
 
 function services(command ,reqVal) {
   if (command==='getRandSeed') {
     return getRandSeed();
+  }
+  if (command==='regPubKey') {
+    return regPubKey(reqVal);
   }
   console.log(`unkown command.[${command}]`);
   console.log(reqVal);
