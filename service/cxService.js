@@ -39,6 +39,20 @@ function trans(binArray) {
   });
 }
 
+const transStrCode = (()=>{
+  const utf8 = 'utf8',
+        base64 = 'base64';
+
+  function codeTrans(codeA,codeB,str) {
+    return (new Buffer(str,codeA)).toString(codeB);
+  }
+
+  return {
+    strToB64: codeTrans.bind(null, utf8, base64),
+    b64ToStr: codeTrans.bind(null, base64, utf8),
+  };
+})();
+
 const clientManager = (function () {
   const clientMap = {};
 
@@ -106,8 +120,8 @@ function getTestMessage(reqVal) {
   console.log(plaintext);
 
   return new Promise((resolve, reject)=>{
-    //const b64PlainText = transStrCode.strToB64(plaintext)
-    const encObj = cryptico.encrypt(plaintext, publicKeyString);
+    const b64PlainText = transStrCode.strToB64(plaintext);
+    const encObj = cryptico.encrypt(b64PlainText, publicKeyString);
 
     if (encObj.status === 'success') {
       resolve(encObj.cipher);
