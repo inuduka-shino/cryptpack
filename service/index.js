@@ -51,7 +51,7 @@ router.post('/cx/:cmd', bodyParser(), async (ctx, nextp) => {
 });
 
 router.get(/.*/, serv(
-  path.join(__dirname, 'static/'), {
+  path.join(__dirname, '../static/'), {
     index: 'main.html',
     extensions: ['html']
   }
