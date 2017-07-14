@@ -1,9 +1,10 @@
 /* cxService.js */
 /*eslint-env node */
-/*eslint no-console: off */
+/*eslint no-console: warn */
 
 const crypto=require('crypto'),
-      cryptico = require('cryptico');
+      cryptico = require('cryptico'),
+      logs = require('../modules/logs');
 
 const transMap = {
   true: {
@@ -116,19 +117,12 @@ function getTestMessage(reqVal) {
 
   const plaintext = testMessage[reqVal.testNum];
 
-  console.log('plaintext');
-  console.log(plaintext);
-
   return new Promise((resolve, reject)=>{
     const b64PlainText = transStrCode.strToB64(plaintext);
     const encObj = cryptico.encrypt(b64PlainText, publicKeyString);
 
     if (encObj.status === 'success') {
       resolve(encObj.cipher);
-      console.log('publicKeyString');
-      console.log(publicKeyString);
-      console.log('encObj.cipher');
-      console.log(encObj.cipher);
 
       return;
     }
@@ -146,8 +140,8 @@ function services(command ,reqVal) {
   if (command==='getTestMessage') {
     return getTestMessage(reqVal);
   }
-  console.log(`unkown command.[${command}]`);
-  console.log(reqVal);
+  logs.log(`unkown command.[${command}]`);
+  logs.log(reqVal);
   throw new Error(`unkown command.[${command}]`);
 }
 
