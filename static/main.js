@@ -37,6 +37,7 @@ define((require) => {
     return plaintext;
   }
 
+  //eslint-disable-next-line max-statements
   (async () => {
     await Promise.all([
             domUtil.checkLoadedDocument(),
@@ -62,32 +63,39 @@ define((require) => {
           },
           $cryptoTest = $('cryptotest');
 
+    let regId=null;
+
     $('genRSAKeyButton').on(
       'click',
       () => {
-      msg('start gen sec key...');
+        msg('start gen sec key...');
         registSecKey()
-        .then((regId)=>{
+        .then((regId0)=>{
+          regId = regId0;
           msg('generated sec key !');
+        });
+      }
+    );
 
-          return Promise.all([
+    $('getTestMessage').on(
+      'click',
+      () => {
+          Promise.all([
             getTestMessage(regId, 0),
             getTestMessage(regId, 1),
             getTestMessage(regId, 2)
-          ]);
-        })
-        .then((enctexts)=>{
-          const plaintext = enctexts.map((enctext) => {
-            const decObj = cryptico.decrypt(enctext, theRSAKey);
+          ]).then((enctexts)=>{
+            const plaintext = enctexts.map((enctext) => {
+              const decObj = cryptico.decrypt(enctext, theRSAKey);
 
-            if (decObj.status !== 'success') {
-              throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
-            }
+                if (decObj.status !== 'success') {
+                  throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+                }
 
-            return base64Util.decode(decObj.plaintext);
-          }).join(':');
+                return base64Util.decode(decObj.plaintext);
+              }).join(':');
 
-          msg(`message is [${plaintext}]`);
+            msg(`message is [${plaintext}]`);
         });
       }
     );
