@@ -12,6 +12,7 @@ const cryptico = require('cryptico'),
 function getRandSeed() {
   return randomString.get();
 }
+
 function regPubKey(reqVal) {
   const publicKeyString = reqVal.publicKeyString;
 
