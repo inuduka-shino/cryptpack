@@ -14,10 +14,11 @@ function getRandSeed() {
 }
 
 function regPubKey(reqVal) {
-  const publicKeyString = reqVal.publicKeyString;
+  const publicKeyString = reqVal.publicKeyString,
+        clientName = reqVal.clientName;
 
   return new Promise((resolve)=>{
-    const clientId =clientManager.registClient(publicKeyString);
+    const clientId =clientManager.registClient(clientName, publicKeyString);
 
     resolve(clientId);
   });

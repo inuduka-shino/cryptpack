@@ -54,8 +54,9 @@ define(() =>{
       getRandSeed () {
         return cxCommand('getRandSeed');
       },
-      regPubKey(publicKeyString) {
+      regPubKey(clientName, publicKeyString) {
         return cxCommand('regPubKey',{
+          clientName,
           publicKeyString
         });
       },

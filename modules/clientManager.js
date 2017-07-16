@@ -42,7 +42,7 @@ module.exports = (()=>{
   }
   const clientMap = {};
 
-  function registClient(publicKeyString) {
+  function registClient(clientName, publicKeyString) {
     const clientId = 'ASS001CL001';
 
     clientMap[clientId] = publicKeyString;
