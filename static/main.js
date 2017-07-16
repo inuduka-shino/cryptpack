@@ -5,10 +5,10 @@
 define((require) => {
   const domUtil = require('./domUtil'),
         cryptoTest = require('./cryptoTest'),
-        cxMng = require('./cx');
+        cxMng = require('./cx'),
+        base64Util = require('base64Util');
 
   let theRSAKey = null;
-
 
   const cx = cxMng();
   const $ = domUtil.$;
@@ -72,7 +72,8 @@ define((require) => {
 
           return Promise.all([
             getTestMessage(regId, 0),
-            getTestMessage(regId, 1)
+            getTestMessage(regId, 1),
+            getTestMessage(regId, 2)
           ]);
         })
         .then((enctexts)=>{
@@ -83,8 +84,7 @@ define((require) => {
               throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
             }
 
-            //$decText.text(base64Util.decode(decObj.plaintext));
-            return decObj.plaintext;
+            return base64Util.decode(decObj.plaintext);
           }).join(':');
 
           msg(`message is [${plaintext}]`);
