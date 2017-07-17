@@ -6,7 +6,8 @@ define((require) => {
   const domUtil = require('./domUtil'),
         cryptoTest = require('./cryptoTest'),
         cxMng = require('./cx'),
-        base64Util = require('base64Util');
+        base64Util = require('./base64Util'),
+        clientSaver = require('./clientSaver');
 
   let theRSAKey = null;
 
