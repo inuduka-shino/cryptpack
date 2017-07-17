@@ -24,7 +24,7 @@ define((require) => {
     const publicKeyString = cryptico.publicKeyString(aRSAkey);
 
     // サービス登録
-    const clientId = await cx.regPubKey(publicKeyString);
+    const clientId = await cx.regPubKey('demo01', publicKeyString);
 
     // db 保管
     theRSAKey = aRSAkey;
