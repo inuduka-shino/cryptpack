@@ -1,6 +1,6 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global define */
+/*global define, cryptico */
 
 define((require) => {
   const domUtil = require('./domUtil'),
@@ -31,6 +31,7 @@ define((require) => {
 
     // db 保管
     theRSAKey = aRSAkey;
+    clntSvr.save(clientId, aRSAkey);
 
     return clientId;
   }
