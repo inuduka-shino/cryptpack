@@ -1,6 +1,6 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global Promise , define, cryptico */
+/*global define */
 
 define((require) => {
   const domUtil = require('./domUtil'),
@@ -13,6 +13,8 @@ define((require) => {
 
   const cx = cxMng();
   const $ = domUtil.$;
+  const clntSvr = clientSaver.generate();
+
 
   async function registSecKey() {
     const bits = 1024;
