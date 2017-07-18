@@ -9,7 +9,7 @@ define((require) => {
         base64Util = require('./base64Util'),
         clientSaver = require('./clientSaver');
 
-  let theRSAKey = null;
+  let theClientID = null;
 
   const cx = cxMng();
   const $ = domUtil.$;
@@ -30,7 +30,7 @@ define((require) => {
     const clientId = await cx.regPubKey('demo01', publicKeyString);
 
     // db 保管
-    theRSAKey = aRSAkey;
+    theClientID = clientId;
     clntSvr.save(clientId, aRSAkey);
 
     return clientId;
@@ -84,22 +84,24 @@ define((require) => {
     $('getTestMessage').on(
       'click',
       () => {
-          Promise.all([
-            getTestMessage(regId, 0),
-            getTestMessage(regId, 1),
-            getTestMessage(regId, 2)
-          ]).then((enctexts)=>{
-            const plaintext = enctexts.map((enctext) => {
-              const decObj = cryptico.decrypt(enctext, theRSAKey);
+        const aRSAKey = clntSvr.load(theClientID);
 
-                if (decObj.status !== 'success') {
-                  throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
-                }
+        Promise.all([
+          getTestMessage(regId, 0),
+          getTestMessage(regId, 1),
+          getTestMessage(regId, 2)
+        ]).then((enctexts)=>{
+          const plaintext = enctexts.map((enctext) => {
+            const decObj = cryptico.decrypt(enctext, aRSAKey);
 
-                return base64Util.decode(decObj.plaintext);
-              }).join(':');
+            if (decObj.status !== 'success') {
+              throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+            }
 
-            msg(`message is [${plaintext}]`);
+            return base64Util.decode(decObj.plaintext);
+          }).join(':');
+
+          msg(`message is [${plaintext}]`);
         });
       }
     );

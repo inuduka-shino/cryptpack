@@ -4,26 +4,83 @@
 /*global define */
 
 define(() => {
+  const
+    osnNames = ['n001'],
+    osnRSAKey = osnNames[0],
+    dbSchema = {
+    version: 6,
+    newSchema(db) {
+      console.log(`change indexedDB objectStore:ver ${this.version}`);
+      db.createObjectStore(osnRSAKey, {
+        keyPath: 'clientId'
+      });
 
-  async function save(openPrms, key, value) {
+      /*
+      db.createObjectStore('uinfo', {
+        keyPath: 'userId'
+      });
+      */
+    },
+    translate(db) {
+      // throw new Error('データ変換ロジックがありません。');
+      db.deleteObjectStore(osnRSAKey);
+      //db.deleteObjectStore('uinfo');
+      console.log('delete indexedDB objectStore');
+    }
+  };
+
+  function dbOpen(version) {
+
+    return new Promise((resolve, reject) =>{
+      try {
+        const req = window.indexedDB.open('SxClient', version);
+
+        req.onupgradeneeded = () =>{
+          const db = req.result;
+
+          if (db.objectStoreNames.contains(osnRSAKey)) {
+            dbSchema.translate(db);
+          }
+          dbSchema.newSchema(db);
+        };
+        req.onsuccess = () => {
+            const db = req.result;
+
+            db.onerror=(errEvent) => {
+              console.log(`db error : ${errEvent.target.errorCode}`);
+            };
+            resolve(db);
+        };
+        req.oncomplite = () => {
+          console.log('db onsuccess');
+        };
+        req.onerror = () => {
+            reject(new Error(`indexedDB open error. \n${req.error}`));
+        };
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  async function save(key, value) {
     console.log('save');
 
-    const db = await openPrms;
-    const tx = db.transaction(['client'], 'readwrite'),
-          store = tx.objectStore('client');
-
+    const db = await dbOpen(dbSchema.version);
+    const tx = db.transaction(osnNames, 'readwrite'),
+          store = tx.objectStore(osnRSAKey);
     const req = store.put({
       clientId: key,
       value
     });
 
+    tx.oncomplite = () => {
+      console.log('indexedDB save trans complite');
+    };
+
     await new Promise((resolve, reject)=>{
-      tx.oncomplite = () => {
-        console.log('trans cpmplite');
-      };
       req.onsuccess = () =>{
-        console.log('put success');
-        tx.close();
+        db.close();
         resolve();
       };
       req.onerror = (err) => {
@@ -33,53 +90,31 @@ define(() => {
     });
 
   }
-  async function load(openPrms) {
+
+  async function load(key) {
     console.log('load');
-    const db = await openPrms;
+    const db = await dbOpen(dbSchema.version);
+    const tx = db.transaction(osnNames, 'readwrite'),
+          store = tx.objectStore(osnRSAKey);
+    const req = store.get(key);
+    const ret = await new Promise((resolve, reject)=>{
+      req.onsuccess = () =>{
+        db.close();
+        resolve(req.result.name);
+      };
+      req.onerror = (err) => {
+        console.log(err);
+        reject(err);
+      };
+    });
+
+    return ret;
   }
 
-  function generate() {
-    const version = 1,
-          openPrms =new Promise((resolve, reject) =>{
-            try {
-              const req = window.indexedDB.open('SxClient', version);
-
-              req.onupgradeneeded = () =>{
-                console.log('db onupgradeneeded');
-                const db = req.result;
-
-                if (db.objectStoreNames.contains('client')) {
-                  throw new Error('データ変換ロジックがありません。');
-                  //db.deleteObjectStore('client');
-                }
-                db.createObjectStore('client', {
-                  keyPath: 'clientId'
-                });
-              };
-              req.onsuccess = () => {
-                  const db = req.result;
-
-                  console.log('db onsuccess');
-                  db.onerror=(errEvent) => {
-                    console.log(`db error : ${errEvent.target.errorCode}`);
-                  };
-                  resolve(db);
-              };
-              req.oncomplite = () => {
-                console.log('db onsuccess');
-              };
-
-              req.onerror = () => {
-                  reject(new Error(`indexedDB open error. \n${req.error}`));
-              };
-            } catch (err) {
-              reject(err);
-            }
-          });
-
+function generate() {
     return {
-      save: save.bind(null, openPrms),
-      load: load.bind(null, openPrms),
+      save: save.bind(null),
+      load: load.bind(null),
     };
   }
 
