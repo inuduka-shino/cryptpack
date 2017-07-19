@@ -100,7 +100,7 @@ define(() => {
     const ret = await new Promise((resolve, reject)=>{
       req.onsuccess = () =>{
         db.close();
-        resolve(req.result.name);
+        resolve(req.result.value);
       };
       req.onerror = (err) => {
         console.log(err);
