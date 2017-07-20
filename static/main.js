@@ -9,7 +9,7 @@ define((require) => {
         base64Util = require('./base64Util'),
         clientSaver = require('./clientSaver');
 
-  let theClientID = null;
+  //let theClientID = null;
 
   const cx = cxMng();
   const $ = domUtil.$;
@@ -30,8 +30,8 @@ define((require) => {
     const clientId = await cx.regPubKey('demo01', publicKeyString);
 
     // db 保管
-    theClientID = clientId;
-    clntSvr.save(clientId, aRSAkey);
+    //theClientID = clientId;
+    await clntSvr.save(clientId, aRSAkey);
 
     return clientId;
   }
@@ -84,14 +84,32 @@ define((require) => {
     $('getTestMessage').on(
       'click',
       () => {
-        const aRSAKey = clntSvr.load(theClientID);
+        const aRSAKeyPrms = clntSvr.load(regId);
+        const rcvPrmses = [
+          aRSAKeyPrms.then((aRSAKey)=>{
+            return getTestMessage(
+                regId, 0
+              ).then((enctext) =>{
+                const decObj = cryptico.decrypt(enctext, aRSAKey);
 
-        Promise.all([
+                if (decObj.status !== 'success') {
+                  throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+                }
+
+                return base64Util.decode(decObj.plaintext);
+              });
+          })
+        ];
+
+        /*
+        const rcvPrmses = [
           getTestMessage(regId, 0),
-          getTestMessage(regId, 1),
-          getTestMessage(regId, 2)
-        ]).then((enctexts)=>{
-          const plaintext = enctexts.map((enctext) => {
+          // getTestMessage(regId, 1),
+          // getTestMessage(regId, 2)
+        ].map((msgPrms)=> {
+          return Promise.all(
+            [msgPrms, aRSAKeyPrms]
+          ).then(([enctext, aRSAKey])=>{
             const decObj = cryptico.decrypt(enctext, aRSAKey);
 
             if (decObj.status !== 'success') {
@@ -99,9 +117,13 @@ define((require) => {
             }
 
             return base64Util.decode(decObj.plaintext);
-          }).join(':');
+          });
+        });
+        */
+        Promise.all(rcvPrmses).then((msgList)=>{
+          const msgtxt = msgList.join(':');
 
-          msg(`message is [${plaintext}]`);
+          msg(`message is [${msgtxt}]`);
         });
       }
     );
