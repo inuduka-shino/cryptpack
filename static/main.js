@@ -9,7 +9,7 @@ define((require) => {
         base64Util = require('./base64Util'),
         clientSaver = require('./clientSaver');
 
-  let theClientID = null;
+  //let theClientID = null;
 
   const cx = cxMng();
   const $ = domUtil.$;
@@ -30,7 +30,7 @@ define((require) => {
     const clientId = await cx.regPubKey('demo01', publicKeyString);
 
     // db 保管
-    theClientID = clientId;
+    //theClientID = clientId;
     await clntSvr.save(clientId, aRSAkey);
 
     return clientId;
@@ -121,9 +121,9 @@ define((require) => {
         });
         */
         Promise.all(rcvPrmses).then((msgList)=>{
-          const msg = msgList.join(':');
+          const msgtxt = msgList.join(':');
 
-          msg(`message is [${msg}]`);
+          msg(`message is [${msgtxt}]`);
         });
       }
     );
