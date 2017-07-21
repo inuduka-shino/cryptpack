@@ -86,26 +86,9 @@ define((require) => {
       () => {
         const aRSAKeyPrms = clntSvr.load(regId);
         const rcvPrmses = [
-          aRSAKeyPrms.then((aRSAKey)=>{
-            return getTestMessage(
-                regId, 0
-              ).then((enctext) =>{
-                const decObj = cryptico.decrypt(enctext, aRSAKey);
-
-                if (decObj.status !== 'success') {
-                  throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
-                }
-
-                return base64Util.decode(decObj.plaintext);
-              });
-          })
-        ];
-
-        /*
-        const rcvPrmses = [
           getTestMessage(regId, 0),
-          // getTestMessage(regId, 1),
-          // getTestMessage(regId, 2)
+          getTestMessage(regId, 1),
+          getTestMessage(regId, 2)
         ].map((msgPrms)=> {
           return Promise.all(
             [msgPrms, aRSAKeyPrms]
@@ -119,7 +102,7 @@ define((require) => {
             return base64Util.decode(decObj.plaintext);
           });
         });
-        */
+
         Promise.all(rcvPrmses).then((msgList)=>{
           const msgtxt = msgList.join(':');
 
