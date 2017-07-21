@@ -1,17 +1,20 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global Promise , define, cryptico */
+/*global define, cryptico */
 
 define((require) => {
   const domUtil = require('./domUtil'),
         cryptoTest = require('./cryptoTest'),
         cxMng = require('./cx'),
-        base64Util = require('base64Util');
+        base64Util = require('./base64Util'),
+        clientSaver = require('./clientSaver');
 
-  let theRSAKey = null;
+  //let theClientID = null;
 
   const cx = cxMng();
   const $ = domUtil.$;
+  const clntSvr = clientSaver.generate();
+
 
   async function registSecKey() {
     const bits = 1024;
@@ -27,7 +30,8 @@ define((require) => {
     const clientId = await cx.regPubKey('demo01', publicKeyString);
 
     // db 保管
-    theRSAKey = aRSAkey;
+    //theClientID = clientId;
+    await clntSvr.save(clientId, aRSAkey);
 
     return clientId;
   }
@@ -80,22 +84,29 @@ define((require) => {
     $('getTestMessage').on(
       'click',
       () => {
-          Promise.all([
-            getTestMessage(regId, 0),
-            getTestMessage(regId, 1),
-            getTestMessage(regId, 2)
-          ]).then((enctexts)=>{
-            const plaintext = enctexts.map((enctext) => {
-              const decObj = cryptico.decrypt(enctext, theRSAKey);
+        const aRSAKeyPrms = clntSvr.load(regId);
+        const rcvPrmses = [
+          getTestMessage(regId, 0),
+          getTestMessage(regId, 1),
+          getTestMessage(regId, 2)
+        ].map((msgPrms)=> {
+          return Promise.all(
+            [msgPrms, aRSAKeyPrms]
+          ).then(([enctext, aRSAKey])=>{
+            const decObj = cryptico.decrypt(enctext, aRSAKey);
 
-                if (decObj.status !== 'success') {
-                  throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
-                }
+            if (decObj.status !== 'success') {
+              throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+            }
 
-                return base64Util.decode(decObj.plaintext);
-              }).join(':');
+            return base64Util.decode(decObj.plaintext);
+          });
+        });
 
-            msg(`message is [${plaintext}]`);
+        Promise.all(rcvPrmses).then((msgList)=>{
+          const msgtxt = msgList.join(':');
+
+          msg(`message is [${msgtxt}]`);
         });
       }
     );
