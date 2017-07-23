@@ -3,11 +3,8 @@
 /*global define */
 /*eslint no-console: off */
 
-define(()=>{
-  const pCryptico = {
-    RSAKey, //eslint-disable-line no-undef
-    BigInteger //eslint-disable-line no-undef
-  };
+define((require)=>{
+  const pCryptico = require('cryptico');
 
   function regenBigInteger(plainObj) {
     const bigInt = Object.create(pCryptico.BigInteger.prototype);
