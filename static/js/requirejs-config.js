@@ -5,7 +5,10 @@
 
 require.config({
   paths: {
-    'cryptico': ['/lib/cryptico.min']
+    'cryptico': ['/lib/cryptico.min'],
+    'maquette': [
+        '/lib/maquette.min',
+      ],
   },
   shim: {
     'cryptico': {
