@@ -5,20 +5,27 @@
 
 
 define((require)=>{
-  const maquette = require('maquette');
+  const maquette = require('maquette'),
+        domUtil = require('domUtil');
 
   const h=maquette.h,
         projector=maquette.createProjector();
 
-  function renderTest() {
-    return h('h1', 'title');
+  function renderMaquette() {
+    return h('body', [
+      h('h1', 'title'),
+      h('p', h('button', {
+        class: 'btn'
+      }, 'push')),
+      h('p', h('input')),
+    ]);
   }
-  document.addEventListener(
-    'DOMContentLoaded',
+  domUtil.checkLoadedDocument().then(
     () => {
-      projector.append(
+      //domUtil.bodyClear();
+      projector.replace(
         document.body,
-        renderTest
+        renderMaquette
       );
     }
   );
