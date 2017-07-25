@@ -11,21 +11,75 @@ define((require)=>{
   const h=maquette.h,
         projector=maquette.createProjector();
 
-  function renderMaquette() {
-    return h('body', [
-      h('h1', 'title'),
-      h('p', h('button', {
-        class: 'btn'
-      }, 'push')),
-      h('p', h('input')),
-    ]);
-  }
+  function genCounter() {
+    let counter = 0;
+
+    return function () {
+      const c = counter;
+      counter += 1;
+      return c;
+    };
+ }
+
+ function genHDiv() {
+   const key = genCounter();
+
+   return function (subH) {
+     return h(
+       'div',
+       {
+         key: key()
+       },
+       subH
+     );
+   };
+ }
+
+  const bodypart = (()=>{
+    let message = 'message area';
+
+    function clickHandler(event) {
+      event.preventDefault();
+      message='click!';
+    }
+    function inputHandler(event) {
+      message=event.target.value;
+    }
+
+     function render() {
+       const hDiv=genHDiv();
+
+       return h('body', [
+         h('h3', 'クライアント登録'),
+         hDiv(message),
+         hDiv(h(
+           'button',
+           {
+             class: 'btn',
+             onclick: clickHandler,
+           },
+           'push'
+          )),
+          hDiv(h(
+            'input',
+            {
+             oninput: inputHandler
+           }
+         )),
+       ]);
+     }
+
+    return {
+      render
+    };
+
+  })();
+
   domUtil.checkLoadedDocument().then(
     () => {
-      //domUtil.bodyClear();
       projector.replace(
         document.body,
-        renderMaquette
+        bodypart.render
       );
     }
   );
