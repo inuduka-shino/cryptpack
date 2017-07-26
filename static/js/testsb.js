@@ -28,44 +28,82 @@ define((require)=>{
      return h(
        'div',
        {
-         key: key()
+         key: key(),
+         class: 'row',
        },
        subH
      );
    };
  }
 
+  function inputParts (label, submitHandler) {
+    let hInput=null;
+
+    function submitHandler0() {
+      try {
+        const value=hInput.domNode.value;
+        submitHandler(value);
+      } catch (e) {
+        console.log(e.stack);
+      }
+      return false;
+    }
+
+    function render() {
+      hInput = h('input',{
+          class: 'form-control',
+          typep: 'text',
+          // oninput: inputHandler
+        });
+      return h(
+      'form',{
+        class: 'col xs-11',
+        onsubmit: submitHandler0
+      },
+      [
+        h('label', label),
+        hInput
+      ]
+      );
+    }
+    return {
+      render
+    };
+  }
   const bodypart = (()=>{
-    let message = 'message area';
+    let message = 'message area',
+        userID = null;
 
     function clickHandler(event) {
       event.preventDefault();
       message='click!';
     }
-    function inputHandler(event) {
-      message=event.target.value;
-    }
+    const pURLInput = inputParts('cx URL', (inputVal)=>{
+      message=inputVal;
+    });
+    const pUserIdInput = inputParts('userID', (inputVal)=>{
+      userID = inputVal;
+      message = `userid:${userID}`;
+    });
 
      function render() {
        const hDiv=genHDiv();
 
        return h('body', [
          h('h3', 'クライアント登録'),
-         hDiv(message),
+         hDiv(h('div', {
+           class: 'col xs-12'
+         }, message)),
+         hDiv(pURLInput.render()),
+         hDiv(pUserIdInput.render()),
          hDiv(h(
            'button',
            {
-             class: 'btn',
+             class: 'btn col xs-1',
              onclick: clickHandler,
            },
            'push'
           )),
-          hDiv(h(
-            'input',
-            {
-             oninput: inputHandler
-           }
-         )),
        ]);
      }
 
