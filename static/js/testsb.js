@@ -36,12 +36,67 @@ define((require)=>{
    };
  }
 
+ function buttonParts(label, handler) {
+   function clickHandler(event) {
+     event.preventDefault();
+     handler();
+   }
+
+   function render() {
+     return h('div',{
+       class: 'col xs-12',
+     }, h(
+       'button',
+       {
+         style: 'margin-top: 7px;',
+         class: 'btn btn-sm',
+         onclick: clickHandler,
+       },
+       label
+     ));
+   }
+   return {
+     render,
+   };
+ }
+
+   function messageParts() {
+     let message = 'ready..',
+        colorClass = 'light';
+
+    function set(msg) {
+      if (msg === '' || msg === null || typeof msg === 'undefined') {
+        message = 'ready..';
+        colorClass = 'light';
+      } else {
+        message = msg;
+        colorClass = 'main';
+      }
+    }
+
+     function render() {
+       return h('div', {
+         classes: {
+           'col': true,
+           'color-light': colorClass === 'light',
+         }
+       }, message);
+     }
+     return {
+       set,
+       render
+     };
+   }
   function inputParts (label, submitHandler) {
     let hInput=null;
 
+    function val() {
+        return hInput.domNode.value;
+    }
+
     function submitHandler0() {
       try {
-        const value=hInput.domNode.value;
+        const value=val();
         submitHandler(value);
       } catch (e) {
         console.log(e.stack);
@@ -57,33 +112,41 @@ define((require)=>{
         });
       return h(
       'form',{
-        class: 'col xs-11',
+        class: 'col xs-12',
         onsubmit: submitHandler0
       },
       [
-        h('label', label),
+        h('label', {
+          class: 'input-label'
+        }, label),
         hInput
       ]
       );
     }
     return {
-      render
+      render,
+      val
     };
   }
   const bodypart = (()=>{
-    let message = 'message area',
+    let
         userID = null;
+    const pMessage = messageParts();
+    //pMessage.set();
 
-    function clickHandler(event) {
-      event.preventDefault();
-      message='click!';
-    }
     const pURLInput = inputParts('cx URL', (inputVal)=>{
-      message=inputVal;
+      pMessage.set(inputVal);
     });
     const pUserIdInput = inputParts('userID', (inputVal)=>{
       userID = inputVal;
-      message = `userid:${userID}`;
+      pMessage.set(`userid:${userID}`);
+    });
+    const pButton = buttonParts('set', () =>{
+      pMessage.set('Click!');
+    });
+
+    const pRegClientButton = buttonParts('クライアント登録', () =>{
+      pMessage.set('クライアント登録');
     });
 
      function render() {
@@ -91,19 +154,11 @@ define((require)=>{
 
        return h('body', [
          h('h3', 'クライアント登録'),
-         hDiv(h('div', {
-           class: 'col xs-12'
-         }, message)),
+         hDiv(pMessage.render()),
          hDiv(pURLInput.render()),
          hDiv(pUserIdInput.render()),
-         hDiv(h(
-           'button',
-           {
-             class: 'btn col xs-1',
-             onclick: clickHandler,
-           },
-           'push'
-          )),
+         hDiv(pButton.render()),
+         hDiv(pRegClientButton.render()),
        ]);
      }
 

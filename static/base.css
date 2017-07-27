@@ -1,3 +1,13 @@
 body {
   padding: 10px;
 }
+
+
+label.input-label {
+    margin-bottom: -5px;
+    margin-top: 2px;
+}
+
+input.form-control {
+  width: 90%;
+}
