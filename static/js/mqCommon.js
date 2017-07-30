@@ -39,8 +39,8 @@ define((require) => {
           key: keyid,
           class:'row'
         },
-        pColes.map((pCol)=>{
-          return pCol.render();
+        pColes.map((pCol,idx)=>{
+          return pCol.key(idx).render();
         })
       );
     }
@@ -52,18 +52,29 @@ define((require) => {
 
   }
   function partsCol(pElm, colsize) {
+    let keyid=null,
+          thisIF=null;
+
+    function key(k) {
+      keyid = k;
+      return thisIF;
+    }
     function render() {
       return h(
         'div',
         {
+            key: keyid,
             class: `col ${colsize}`
         },
         pElm.render()
       );
     }
-    return {
+
+    thisIF = {
+      key,
       render
     };
+    return thisIF;
   }
   function partsMessage() {
     let message = 'ready..',
