@@ -11,16 +11,6 @@ define((require)=>{
         partsRow = mqCommon.partsRow,
         partsCol = mqCommon.partsCol;
 
-  const key1 = mqCommon.generateKey();
-  for (let i=0; i < 3; i+=1) {
-    const a=key1();
-    const key2 = mqCommon.generateKey();
-    for (let j=0; j <4; j+=1) {
-      const b=key2();
-      console.log(`a=${a} b=${b}`);
-    }
-  }
-
   const pMessage = mqCommon.partsMessage(),
         pMsgCol = partsCol(pMessage, 'xs-12');
 
