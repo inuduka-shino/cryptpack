@@ -21,18 +21,28 @@ define((require) => {
 
   function partsRow(pCol) {
     let keyid= null,
-        thisIF=null;
+        thisIF=null,
+        pColes=null;
 
+    if (Array.isArray(pCol)) {
+      pColes=pCol;
+    } else {
+      pColes=[pCol];
+    }
     function key(k) {
       keyid=k;
       return thisIF;
     }
     function render () {
-      return h('div',{
-        key: keyid,
-        class:'row'
-      },
-      [pCol.render()]);
+      return h('div',
+        {
+          key: keyid,
+          class:'row'
+        },
+        pColes.map((pCol)=>{
+          return pCol.render();
+        })
+      );
     }
     thisIF = {
       key,
