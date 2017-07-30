@@ -20,9 +20,12 @@ define((require) => {
   }
 
   function partsRow(pCol) {
-    let keyid= null;
+    let keyid= null,
+        thisIF=null;
+
     function key(k) {
       keyid=k;
+      return thisIF;
     }
     function render () {
       return h('div',{
@@ -31,13 +34,51 @@ define((require) => {
       },
       [pCol.render()]);
     }
-    return {
+    thisIF = {
       key,
       render,
     };
+    return thisIF;
 
   }
-  function partsCol() {
+  function partsCol(pElm, colsize) {
+    function render() {
+      return h(
+        'div',
+        {
+            class: `col ${colsize}`
+        },
+        pElm.render()
+      );
+    }
+    return {
+      render
+    };
+  }
+  function partsMessage() {
+    let message = 'ready..',
+       colorClass = 'light';
+
+   function set(msg) {
+     if (msg === '' || msg === null || typeof msg === 'undefined') {
+       message = 'ready..';
+       colorClass = 'light';
+     } else {
+       message = msg;
+       colorClass = 'main';
+     }
+   }
+    function render() {
+      return h('span', {
+        classes: {
+          'color-light': colorClass === 'light',
+        }
+      }, message);
+    }
+    return {
+      set,
+      render
+    };
 
   }
 
@@ -45,6 +86,7 @@ define((require) => {
   return {
     generateKey,
     partsRow,
-    partsCol
+    partsCol,
+    partsMessage
   };
 });
