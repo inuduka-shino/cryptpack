@@ -21,16 +21,30 @@ define((require)=>{
   pMessage2.set('abc');
   pMessage3.set('あいう');
 
+  const bodyClasses = {
+    smartphone: false,
+  };
+
+  function smartphone() {
+    bodyClasses.smartphone = true;
+  }
+
   function render() {
 
     return h('body',
+      {
+        classes: bodyClasses,
+      },
       [
         h('h3', 'クライアント登録'),
         partsRow(pMsgCol),
         partsRow([pMsgCol2,pMsgCol3]),
       ].map((prow, idx)=>{
         if (prow.render) {
-          return prow.key(idx).render();
+          if (prow.key) {
+            return prow.key(idx).render();
+          }
+          return prow.render();
         }
         return prow;
       })
@@ -38,6 +52,7 @@ define((require)=>{
   }
 
   return {
-    render
+    smartphone,
+    render,
   };
 });

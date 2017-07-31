@@ -80,11 +80,21 @@ define(()=>{
     });
   }
 
+  function deviceType() {
+    const userAgent = navigator.userAgent;
+
+    if (userAgent.indexOf('Android') > 0 && userAgent.indexOf('Mobile') > 0) {
+      return 'mobile';
+    }
+    return 'unkown';
+   }
+
   return {
     $,
     getClass$List,
     getTag$List,
     bodyClear,
-    checkLoadedDocument
+    checkLoadedDocument,
+    deviceType,
   };
 });

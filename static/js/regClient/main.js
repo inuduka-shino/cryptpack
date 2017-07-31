@@ -10,8 +10,10 @@ define((require)=>{
 
   const projector=maquette.createProjector();
 
+  if (domUtil.deviceType()==='mobile') {
+    partsBody.smartphone();
+  }
   domUtil.checkLoadedDocument().then(() => {
-    console.log('loaded');
       projector.replace(
         document.body,
         partsBody.render
