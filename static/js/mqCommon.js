@@ -8,49 +8,44 @@ define((require) => {
 
   const h = maquette.h;
 
-  function key(cntx) {
-    const ret = cntx.counter;
-    cntx.counter += 1;
-    return ret;
+
+  function setKey(cntx, k) {
+    cntx.keyid=k;
+    return cntx.thisIF;
   }
-  function generateKey() {
-    return key.bind(null, {
-      counter: 0
-    });
+
+  function partsRowRender (cntx) {
+    return h('div',
+      {
+        key: cntx.keyid,
+        class:'row'
+      },
+      cntx.pColes.map((pCol,idx)=>{
+        return pCol.key(idx).render();
+      })
+    );
   }
 
   function partsRow(pCol) {
-    let keyid= null,
-        thisIF=null,
-        pColes=null;
+    const cntx= {
+      thisIF: null,
+      keyid:  null,
+      pColes: null,
+    };
 
     if (Array.isArray(pCol)) {
-      pColes=pCol;
+      cntx.pColes=pCol;
     } else {
-      pColes=[pCol];
+      cntx.pColes=[pCol];
     }
-    function key(k) {
-      keyid=k;
-      return thisIF;
-    }
-    function render () {
-      return h('div',
-        {
-          key: keyid,
-          class:'row'
-        },
-        pColes.map((pCol,idx)=>{
-          return pCol.key(idx).render();
-        })
-      );
-    }
-    thisIF = {
-      key,
-      render,
+    cntx.thisIF = {
+      key: setKey.bind(null,cntx),
+      render: partsRowRender.bind(null, cntx),
     };
-    return thisIF;
-
+    return cntx.thisIF;
   }
+
+
   function partsCol(pElm, colsize) {
     let keyid=null,
           thisIF=null;
@@ -105,7 +100,6 @@ define((require) => {
 
 
   return {
-    generateKey,
     partsRow,
     partsCol,
     partsMessage
