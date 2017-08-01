@@ -45,31 +45,30 @@ define((require) => {
     return cntx.thisIF;
   }
 
+  function partsColRender(cntx) {
+    return h(
+      'div',
+      {
+          key: cntx.keyid,
+          class: `col ${cntx.colsize}`
+      },
+      cntx.pElm.render()
+    );
+  }
 
   function partsCol(pElm, colsize) {
-    let keyid=null,
-          thisIF=null;
-
-    function key(k) {
-      keyid = k;
-      return thisIF;
-    }
-    function render() {
-      return h(
-        'div',
-        {
-            key: keyid,
-            class: `col ${colsize}`
-        },
-        pElm.render()
-      );
-    }
-
-    thisIF = {
-      key,
-      render
+    const cntx = {
+      keyid: null,
+      thisIF: null,
+      pElm,
+      colsize,
     };
-    return thisIF;
+
+    cntx.thisIF = {
+      key: setKey.bind(null,cntx),
+      render: partsColRender.bind(null, cntx),
+    };
+    return cntx.thisIF;
   }
   function partsMessage() {
     let message = 'ready..',
