@@ -100,10 +100,20 @@ define((require) => {
     };
   }
 
+  function callRenderForMap (prow, idx) {
+    if (prow.render) {
+      if (prow.key) {
+        return prow.key(idx).render();
+      }
+      return prow.render();
+    }
+    return prow;
+  }
 
   return {
     partsRow,
     partsCol,
-    partsMessage
+    partsMessage,
+    callRenderForMap,
   };
 });

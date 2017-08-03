@@ -39,15 +39,7 @@ define((require)=>{
         h('h3', 'クライアント登録'),
         partsRow(pMsgCol),
         partsRow([pMsgCol2,pMsgCol3]),
-      ].map((prow, idx)=>{
-        if (prow.render) {
-          if (prow.key) {
-            return prow.key(idx).render();
-          }
-          return prow.render();
-        }
-        return prow;
-      })
+      ].map(mqCommon.callRenderForMap)
     );
   }
 
