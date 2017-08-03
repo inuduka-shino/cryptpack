@@ -5,15 +5,16 @@
 
 define((require)=>{
   const maquette = require('maquette'),
-        mqCommon = require('../mqCommon');
+        mqUtil = require('../mq/util'),
+        partsRow = require('../mq/partsRow').parts,
+        partsCol = require('../mq/partsCol').parts,
+        partsMessage = require('../mq/partsMessage').parts;
 
-  const h =maquette.h,
-        partsRow = mqCommon.partsRow,
-        partsCol = mqCommon.partsCol;
+  const h =maquette.h;
 
-  const pMessage = mqCommon.partsMessage(),
-        pMessage2 = mqCommon.partsMessage(),
-        pMessage3 = mqCommon.partsMessage(),
+  const pMessage = partsMessage(),
+        pMessage2 = partsMessage(),
+        pMessage3 = partsMessage(),
         pMsgCol = partsCol(pMessage, 'xs-12'),
         pMsgCol2 =partsCol(pMessage2, 'xs-6'),
         pMsgCol3 =partsCol(pMessage3, 'xs-6');
@@ -39,7 +40,7 @@ define((require)=>{
         h('h3', 'クライアント登録'),
         partsRow(pMsgCol),
         partsRow([pMsgCol2,pMsgCol3]),
-      ].map(mqCommon.callRenderForMap)
+      ].map(mqUtil.callRenderForMap)
     );
   }
 
