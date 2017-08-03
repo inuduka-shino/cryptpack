@@ -14,10 +14,17 @@ define((require)=>{
 
   const pMessage = partsMessage(),
         pMessage2 = partsMessage(),
-        pMessage3 = partsMessage(),
-        pMsgCol = partsCol(pMessage, 'xs-12'),
-        pMsgCol2 =partsCol(pMessage2, 'xs-6'),
-        pMsgCol3 =partsCol(pMessage3, 'xs-6');
+        pMessage3 = partsMessage();
+
+  const bodyChildren = [
+      h('h3', 'クライアント登録'),
+      partsRow(partsCol(pMessage, 'xs-12')),
+      partsRow([
+        partsCol(pMessage2, 'xs-6'),
+        partsCol(pMessage3, 'xs-6'),
+      ]),
+    ];
+
 
   pMessage2.set('abc');
   pMessage3.set('あいう');
@@ -36,11 +43,7 @@ define((require)=>{
       {
         classes: bodyClasses,
       },
-      [
-        h('h3', 'クライアント登録'),
-        partsRow(pMsgCol),
-        partsRow([pMsgCol2,pMsgCol3]),
-      ].map(mqUtil.callRenderForMap)
+      bodyChildren.map(mqUtil.callRenderForArray)
     );
   }
 

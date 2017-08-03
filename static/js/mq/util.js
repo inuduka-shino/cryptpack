@@ -10,7 +10,7 @@ define(() => {
     return cntx.thisIF;
   }
 
-  function callRenderForMap (prow, idx) {
+  function callRenderForArray(prow, idx) {
     if (prow.render) {
       if (prow.key) {
         return prow.key(idx).render();
@@ -22,6 +22,6 @@ define(() => {
 
   return {
     setKey,
-    callRenderForMap,
+    callRenderForArray,
   };
 });
