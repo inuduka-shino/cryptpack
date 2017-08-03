@@ -3,11 +3,11 @@
 /*eslint no-console: off */
 /*global define */
 
+// eslint-disable-next-line max-statements
 define((require) => {
   const maquette = require('maquette');
 
   const h = maquette.h;
-
 
   function setKey(cntx, k) {
     cntx.keyid=k;
@@ -70,31 +70,34 @@ define((require) => {
     };
     return cntx.thisIF;
   }
-  function partsMessage() {
-    let message = 'ready..',
-       colorClass = 'light';
 
-   function set(msg) {
-     if (msg === '' || msg === null || typeof msg === 'undefined') {
-       message = 'ready..';
-       colorClass = 'light';
-     } else {
-       message = msg;
-       colorClass = 'main';
-     }
-   }
-    function render() {
-      return h('span', {
-        classes: {
-          'color-light': colorClass === 'light',
-        }
-      }, message);
+  function partsMessageRender(cntx) {
+    return h('span', {
+      classes: {
+        'color-light': cntx.colorClass === 'light',
+      }
+    }, cntx.message);
+  }
+
+  function partsMessageSet(cntx, msg) {
+    if (msg === '' || msg === null || typeof msg === 'undefined') {
+      cntx.message = 'ready..';
+      cntx.colorClass = 'light';
+    } else {
+      cntx.message = msg;
+      cntx.colorClass = 'main';
     }
-    return {
-      set,
-      render
-    };
+  }
 
+  function partsMessage() {
+    const cntx = {
+        message: 'ready..',
+        colorClass: 'light',
+    };
+    return {
+      set: partsMessageSet.bind(null, cntx),
+      render: partsMessageRender.bind(null, cntx)
+    };
   }
 
 
