@@ -5,7 +5,8 @@
 
 
 // button
-// parts(msg).onclick(handler)
+// pbutton = parts(label).onclick(handler)
+// pbutton.setLabel(label)
 define((require) => {
   const maquette = require('maquette');
   const h = maquette.h;
@@ -45,6 +46,11 @@ define((require) => {
   }
   function onclick(cntx, handler) {
     cntx.clickHandler = handler;
+    return cntx.thisIF;
+  }
+  function setLabel(cntx, label) {
+    cntx.label = label;
+    return cntx.thisIF;
   }
 
   function parts() {
@@ -52,13 +58,19 @@ define((require) => {
       label: 'push',
       light: false,
       handler: null,
-    };
-    cntx.onclickButton = onclickButton.bind(null, cntx);
 
-    return {
+      onclickButton: null,
+      thisIF: null
+    };
+
+    cntx.onclickButton = onclickButton.bind(null, cntx);
+    cntx.thisIF = {
+      setLabel:  setLabel.bind(null,cntx),
       onclick:  onclick.bind(null,cntx),
       render:   render.bind(null,cntx),
     };
+
+    return cntx.thisIF;
   }
 
   return {

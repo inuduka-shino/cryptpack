@@ -14,24 +14,27 @@ define((require)=>{
   const h =maquette.h;
 
   const pMessage = partsMessage(),
-        pButton = partsButton('登録'),
+        pRegButton = partsButton(),
         pMessage2 = partsMessage(),
         pMessage3 = partsMessage();
 
   const bodyChildren = [
       h('h3', 'クライアント登録'),
-      partsRow(partsCol(pMessage, 'xs-12')),
-      partsRow([partsCol(pButton)]),
+      partsRow(partsCol(pMessage)),
+      partsRow([partsCol(pRegButton.setLabel('登録'))]),
       partsRow([
         partsCol(pMessage2, 'xs-6'),
         partsCol(pMessage3, 'xs-6'),
       ]),
     ];
 
-  pButton.onclick(()=>{
+  pRegButton.onclick(()=>{
     return new Promise(()=>{
-      pMessage2.set('click!!');
-
+      pRegButton.setLabel('登録中...');
+      pMessage.set('登録処理開始');
+    }).then(()=>{
+      pRegButton.setLabel('登録');
+      pMessage.set('登録処理完了');
     });
   });
   pMessage3.set('あいう');
