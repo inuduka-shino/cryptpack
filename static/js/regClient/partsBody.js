@@ -3,6 +3,7 @@
 /*eslint no-console: off */
 /*global define */
 
+//eslint-disable-next-line max-statements
 define((require)=>{
   const maquette = require('maquette'),
         mqUtil = require('../mq/util'),
@@ -15,6 +16,7 @@ define((require)=>{
 
   const pMessage = partsMessage(),
         pRegButton = partsButton(),
+        pTestButton = partsButton(),
         pMessage2 = partsMessage(),
         pMessage3 = partsMessage();
 
@@ -22,14 +24,17 @@ define((require)=>{
       h('h3', 'クライアント登録'),
       partsRow(partsCol(pMessage)),
       partsRow([partsCol(pRegButton.setLabel('登録'))]),
+      partsRow([partsCol(pTestButton.setLabel('テスト'))]),
       partsRow([
         partsCol(pMessage2, 'xs-6'),
         partsCol(pMessage3, 'xs-6'),
       ]),
     ];
 
+  let regButtonResolve = null;
   pRegButton.onclick(()=>{
-    return new Promise(()=>{
+    return new Promise((resolve)=>{
+      regButtonResolve = resolve;
       pRegButton.setLabel('登録中...');
       pMessage.set('登録処理開始');
     }).then(()=>{
@@ -37,6 +42,11 @@ define((require)=>{
       pMessage.set('登録処理完了');
     });
   });
+
+  pTestButton.onclick(()=>{
+    regButtonResolve();
+  });
+
   pMessage3.set('あいう');
 
   const bodyClasses = {

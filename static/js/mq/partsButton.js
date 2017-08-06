@@ -33,15 +33,14 @@ define((require) => {
     if (cntx.clickHandler) {
       ret = cntx.clickHandler();
     }
-    cntx.light = true;
-    if (ret !== null && typeof ret !== 'undefined') {
-      if (ret.then) {
-        ret.then(() => {
-          cntx.light = false;
-        });
-      }
-    } else {
-      cntx.lisht = false;
+    if (ret === null || typeof ret === 'undefined') {
+      return;
+    }
+    if (ret.then) {
+      cntx.light = true;
+      ret.then(() => {
+        cntx.light = false;
+      });
     }
   }
   function onclick(cntx, handler) {
