@@ -12,6 +12,7 @@ define((require)=>{
         partsMessage = require('../mq/partsMessage').parts,
         partsButton = require('../mq/partsButton').parts;
 
+  let projector = null;
   const h =maquette.h;
 
   const pMessage = partsMessage(),
@@ -53,8 +54,9 @@ define((require)=>{
     smartphone: false,
   };
 
-  function smartphone() {
-    bodyClasses.smartphone = true;
+  function setEnv(envObj) {
+    bodyClasses.smartphone = envObj.smartphone;
+    projector = envObj.projector;
   }
 
   function render() {
@@ -68,7 +70,7 @@ define((require)=>{
   }
 
   return {
-    smartphone,
+    setEnv,
     render,
   };
 });
