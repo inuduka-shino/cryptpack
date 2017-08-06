@@ -13,41 +13,47 @@ define((require) => {
   function render(cntx) {
     return h(
       'button',
-      cntx.properties,
-      cntx.label
-    );
-  }
-  function onclick(cntx, handler) {
-    cntx.handler = handler;
-  }
-  function parts() {
-    const cntx = {
-      label: 'push',
-      properties: {
+      {
         style: 'margin-top: 7px;',
         classes: {
           'btn': true,
           'btn-sm': true,
-          'btn-empty': false,
+          'btn-light': cntx.light,
         },
-        handler: null,
-        onclick () {
-          let ret=null;
+        onclick: cntx.onclickButton
+      },
+      cntx.label
+    );
+  }
 
-          event.preventDefault();
-          if (cntx.handler) {
-            ret = cntx.handler();
-          }
-          cntx.properties.classes['btn-empty'] = true;
-          if (ret && ret.then) {
-            ret.then(() => {
-              cntx.properties.classes['btn-empty'] = false;
-            });
-          }
-
-        }
+  function onclickButton(cntx, event) {
+    let ret=null;
+    event.preventDefault();
+    if (cntx.clickHandler) {
+      ret = cntx.clickHandler();
+    }
+    cntx.light = true;
+    if (ret !== null && typeof ret !== 'undefined') {
+      if (ret.then) {
+        ret.then(() => {
+          cntx.light = false;
+        });
       }
+    } else {
+      cntx.lisht = false;
+    }
+  }
+  function onclick(cntx, handler) {
+    cntx.clickHandler = handler;
+  }
+
+  function parts() {
+    const cntx = {
+      label: 'push',
+      light: false,
+      handler: null,
     };
+    cntx.onclickButton = onclickButton.bind(null, cntx);
 
     return {
       onclick:  onclick.bind(null,cntx),

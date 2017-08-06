@@ -29,7 +29,10 @@ define((require)=>{
     ];
 
   pButton.onclick(()=>{
-    pMessage2.set('click!!');
+    return new Promise(()=>{
+      pMessage2.set('click!!');
+
+    });
   });
   pMessage3.set('あいう');
 
