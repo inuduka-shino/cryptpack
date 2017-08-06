@@ -8,25 +8,29 @@ define((require)=>{
         mqUtil = require('../mq/util'),
         partsRow = require('../mq/partsRow').parts,
         partsCol = require('../mq/partsCol').parts,
-        partsMessage = require('../mq/partsMessage').parts;
+        partsMessage = require('../mq/partsMessage').parts,
+        partsButton = require('../mq/partsButton').parts;
 
   const h =maquette.h;
 
   const pMessage = partsMessage(),
+        pButton = partsButton('登録'),
         pMessage2 = partsMessage(),
         pMessage3 = partsMessage();
 
   const bodyChildren = [
       h('h3', 'クライアント登録'),
       partsRow(partsCol(pMessage, 'xs-12')),
+      partsRow([partsCol(pButton)]),
       partsRow([
         partsCol(pMessage2, 'xs-6'),
         partsCol(pMessage3, 'xs-6'),
       ]),
     ];
 
-
-  pMessage2.set('abc');
+  pButton.onclick(()=>{
+    pMessage2.set('click!!');
+  });
   pMessage3.set('あいう');
 
   const bodyClasses = {
