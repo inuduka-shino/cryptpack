@@ -12,7 +12,7 @@ define((require)=>{
 
   partsBody.setEnv(
     {
-      projector,
+      scheduleRender: projector.scheduleRender,
       smartphone: domUtil.deviceType()==='mobile',
     }
   );
