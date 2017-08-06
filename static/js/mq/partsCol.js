@@ -21,7 +21,7 @@ define((require) => {
     );
   }
 
-  function parts(pElm, colsize) {
+  function parts(pElm, colsize='xs-12') {
     const cntx = {
       keyid: null,
       thisIF: null,
