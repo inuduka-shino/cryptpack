@@ -10,7 +10,8 @@ define((require)=>{
         partsRow = require('../mq/partsRow').parts,
         partsCol = require('../mq/partsCol').parts,
         partsMessage = require('../mq/partsMessage').parts,
-        partsButton = require('../mq/partsButton').parts;
+        partsButton = require('../mq/partsButton').parts,
+        srvApp = require('./serviceApplication');
 
   let scheduleRender = null;
   const h =maquette.h;
@@ -32,28 +33,32 @@ define((require)=>{
       ]),
     ];
 
-  let regButtonResolve = null;
+
   pRegButton.onclick(()=>{
-    return new Promise((resolve)=>{
-      regButtonResolve = resolve;
-      pRegButton.setLabel('登録中...');
-      pMessage.set('登録処理開始');
-    }).then(()=>{
+    pRegButton.setLabel('登録中...');
+    pMessage.set('登録処理開始');
+    return srvApp.regSeckey().then(()=>{
       pRegButton.setLabel('登録');
       pMessage.set('登録処理完了');
+      scheduleRender();
     });
   });
 
   pTestButton.onclick(()=>{
-    regButtonResolve();
+    pTestButton.setLabel('処理中...');
+    pMessage.set('テストメッセージ取得中');
+    return srvApp.getTestMessage().then((msg)=>{
+      pTestButton.setLabel('テスト');
+      pMessage3.set(msg);
+      pMessage.set('テストメッセージ取得完了');
+      scheduleRender();
+    });
   });
 
-  pMessage3.set('あいう');
 
   const bodyClasses = {
     smartphone: false,
   };
-
   function setEnv(envObj) {
     bodyClasses.smartphone = envObj.smartphone;
     scheduleRender = envObj.scheduleRender;

@@ -4,7 +4,7 @@
 /*global define */
 
 define((require) => {
-  const crypticoUtil = require('crypticoUtil');
+  const crypticoUtil = require('./crypticoUtil');
   const
     osnNames = ['n001'],
     osnRSAKey = osnNames[0],
