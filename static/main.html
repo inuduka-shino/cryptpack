@@ -4,24 +4,24 @@
     <meta charset="utf-8">
     <title>cryptpack page</title>
     <link rel="stylesheet" href="/lib/skyblue-gh-pages/css/skyblue.css">
-    <!--link rel="stylesheet" type="text/css" href="main.css" -->
-    <script src="/lib/cryptico.min.js" type="text/javascript"></script>
-    <script src="/lib/require.js" data-main="main.js" type="text/javascript"></script>
+    <script src="/lib/require.js" data-main="./js/main.js" type="text/javascript"></script>
+    <script src="./js/requirejs-config.js" type="text/javascript"></script>
 </head>
 <body>
   <h1 class="title">Crypt Pack</h1>
   <p>
     <ul>
       <li> <a href="./main.html"> this page</a></li>
+      <li> <a href="./regClient.html"> test skyblue page</a></li>
     </ul>
   </p>
 
   <div id="message">mesage area</div>
   <div>
-    <button id="genRSAKeyButton">RSAKey作成</button>
+    <button class="btn" id="genRSAKeyButton">RSAKey作成</button>
   </div>
   <div>
-    <button id="getTestMessage">メッセージ取得</button>
+    <button  class="btn" id="getTestMessage">メッセージ取得</button>
   </div>
   <div>
   <button id="cryptoTestButton">crypto test</button>

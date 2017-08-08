@@ -1,9 +1,11 @@
 /*eslint-env browser */
 /*eslint no-console: off */
-/*global define, cryptico */
+/*global define */
 
 define((require) => {
-  const domUtil = require('./domUtil'),
+  const
+        pCryptico = require('cryptico'),
+        domUtil = require('./domUtil'),
         cryptoTest = require('./cryptoTest'),
         cxMng = require('./cx'),
         base64Util = require('./base64Util'),
@@ -11,6 +13,7 @@ define((require) => {
 
   //let theClientID = null;
 
+  const cryptico = pCryptico.cryptico;
   const cx = cxMng();
   const $ = domUtil.$;
   const clntSvr = clientSaver.generate();

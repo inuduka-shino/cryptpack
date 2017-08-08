@@ -53,9 +53,48 @@ define(()=>{
   function $(idStr) {
     return genElm(document.getElementById(idStr));
   }
+  function map(domCol, handler) {
+    const size = domCol.length,
+          ret = [];
+
+    for (let i=0; i<size; i+=1) {
+      ret.push(handler(domCol[i]));
+    }
+
+    return ret;
+  }
+  function getClass$List(className) {
+    return map(document.getElementsByClassName(className), (domElm)=>{
+      return genElm(domElm);
+    });
+  }
+
+  function getTag$List(tagName) {
+    return map(document.getElementsByTagName(tagName), (domElm)=>{
+      return genElm(domElm);
+    });
+  }
+  function bodyClear() {
+    getTag$List('body').forEach(($)=>{
+      $.text('');
+    });
+  }
+
+  function deviceType() {
+    const userAgent = navigator.userAgent;
+
+    if (userAgent.indexOf('Android') > 0 && userAgent.indexOf('Mobile') > 0) {
+      return 'mobile';
+    }
+    return 'unkown';
+   }
 
   return {
     $,
-    checkLoadedDocument
+    getClass$List,
+    getTag$List,
+    bodyClear,
+    checkLoadedDocument,
+    deviceType,
   };
 });
