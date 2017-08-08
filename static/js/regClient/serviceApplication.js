@@ -37,17 +37,13 @@ define((require)=>{
     theClientID = clientId;
   }
 
-  async function getTestMessage () {
-    /*
+  function getTestMessages () {
     const aRSAKeyPrms = clntSvr.load(theClientID);
-    const rcvPrmses = [
-      getTestMessage(theClientID, 0),
-      getTestMessage(theClientID, 1),
-      getTestMessage(theClientID, 2)
-    ].map((msgPrms)=> {
-      return Promise.all(
-        [msgPrms, aRSAKeyPrms]
-      ).then(([enctext, aRSAKey])=>{
+    const rcvPrmses = [0, 1, 2].map((testId)=> {
+      return Promise.all([
+          cx.getTestMessage(theClientID, testId),
+          aRSAKeyPrms
+        ]).then(([enctext, aRSAKey])=>{
         const decObj = cryptico.decrypt(enctext, aRSAKey);
 
         if (decObj.status !== 'success') {
@@ -57,14 +53,11 @@ define((require)=>{
         return base64Util.decode(decObj.plaintext);
       });
     });
-    const msgs = await rcvPrmses;
-    return msgs.join(':');
-    */
-    return 'aaa';
+    return rcvPrmses;
   }
 
   return {
     regSeckey,
-    getTestMessage,
+    getTestMessages,
   };
 });

@@ -47,9 +47,17 @@ define((require)=>{
   pTestButton.onclick(()=>{
     pTestButton.setLabel('処理中...');
     pMessage.set('テストメッセージ取得中');
-    return srvApp.getTestMessage().then((msg)=>{
+    const msgPrmses = srvApp.getTestMessages(),
+          messages = ['','',''];
+    msgPrmses.forEach((msgPrms, idx)=>{
+      msgPrms.then((msg)=>{
+        messages[idx] = msg;
+        pMessage3.set(messages.join(':'));
+        scheduleRender();
+      });
+    });
+    return Promise.all(msgPrmses).then(()=>{
       pTestButton.setLabel('テスト');
-      pMessage3.set(msg);
       pMessage.set('テストメッセージ取得完了');
       scheduleRender();
     });
