@@ -6,27 +6,29 @@
 define((require) => {
   const crypticoUtil = require('./crypticoUtil');
   const
-    osnNames = ['n001'],
+    osnNames = ['n001', 'n002'],
     osnRSAKey = osnNames[0],
+    osnUserInfo = osnNames[1],
     dbSchema = {
-    version: 6,
+    version: 7,
     newSchema(db) {
       console.log(`change indexedDB objectStore:ver ${this.version}`);
       db.createObjectStore(osnRSAKey, {
         keyPath: 'clientId'
       });
-
-      /*
-      db.createObjectStore('uinfo', {
+      db.createObjectStore(osnUserInfo, {
         keyPath: 'userId'
       });
-      */
     },
     translate(db) {
       // throw new Error('データ変換ロジックがありません。');
       db.deleteObjectStore(osnRSAKey);
-      //db.deleteObjectStore('uinfo');
-      console.log('delete indexedDB objectStore');
+      try {
+        db.deleteObjectStore(osnUserInfo);
+      } catch (e) {
+        console.log('no userInfo db');
+      }
+      console.log('delete all indexedDB objectStore');
     }
   };
 
@@ -66,12 +68,12 @@ define((require) => {
 
   //let theRSAKey=null;
 
-  async function save(key, value) {
+  async function save(osnName, key, value) {
     console.log('save');
 
     const db = await dbOpen(dbSchema.version);
     const tx = db.transaction(osnNames, 'readwrite'),
-          store = tx.objectStore(osnRSAKey);
+          store = tx.objectStore(osnName);
     const req = store.put({
       clientId: key,
       value
@@ -94,11 +96,11 @@ define((require) => {
 
   }
 
-  async function load(key) {
+  async function load(osnName, key) {
     console.log('load');
     const db = await dbOpen(dbSchema.version);
     const tx = db.transaction(osnNames, 'readwrite'),
-          store = tx.objectStore(osnRSAKey);
+          store = tx.objectStore(osnName);
     const req = store.get(key);
     const ret = await new Promise((resolve, reject)=>{
       req.onsuccess = () =>{
@@ -116,8 +118,8 @@ define((require) => {
 
 function generate() {
     return {
-      save: save.bind(null),
-      load: load.bind(null),
+      save: save.bind(null, osnRSAKey),
+      load: load.bind(null, osnRSAKey),
     };
   }
 
