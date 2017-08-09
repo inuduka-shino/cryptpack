@@ -6,30 +6,39 @@
 define((require) => {
   const crypticoUtil = require('./crypticoUtil');
   const
-    osnNames = ['n001', 'n002'],
+    osnNames = ['n001', 'n002', 'n003'],
     osnRSAKey = osnNames[0],
     osnUserInfo = osnNames[1],
+    osnEnv = osnNames[2],
     dbSchema = {
-    version: 7,
-    newSchema(db) {
-      console.log(`change indexedDB objectStore:ver ${this.version}`);
-      db.createObjectStore(osnRSAKey, {
-        keyPath: 'clientId'
-      });
-      db.createObjectStore(osnUserInfo, {
-        keyPath: 'userId'
-      });
-    },
-    translate(db) {
-      // throw new Error('データ変換ロジックがありません。');
-      db.deleteObjectStore(osnRSAKey);
-      try {
-        db.deleteObjectStore(osnUserInfo);
-      } catch (e) {
-        console.log('no userInfo db');
+      version: 10,
+      schema: {
+        [osnRSAKey]: {
+          keyPath: 'clientId'
+        },
+        [osnUserInfo]: {
+          keyPath: 'userId'
+        },
+        [osnEnv]: {
+          keyPath: 'key'
+        },
+      } ,
+      developMode: true,
+      createObjectStore(db, osnName) {
+        console.log(`create indexedDB objectStore[${osnName}] for ver ${dbSchema.version}`);
+        db.createObjectStore(
+          osnName,
+          dbSchema.schema[osnName]
+        );
+      },
+      translateObjectStore(db, osnName) {
+        // 存在が前提
+        if (dbSchema.developMode) {
+          console.log(`delete indexedDB objectStore[${osnName}] for ver ${dbSchema.version}`);
+          db.deleteObjectStore(osnName);
+          dbSchema.createObjectStore(db, osnName);
+        }
       }
-      console.log('delete all indexedDB objectStore');
-    }
   };
 
   function dbOpen(version) {
@@ -41,10 +50,13 @@ define((require) => {
         req.onupgradeneeded = () =>{
           const db = req.result;
 
-          if (db.objectStoreNames.contains(osnRSAKey)) {
-            dbSchema.translate(db);
-          }
-          dbSchema.newSchema(db);
+          osnNames.forEach((osnName)=>{
+            if (db.objectStoreNames.contains(osnName)) {
+              dbSchema.translateObjectStore(db, osnName);
+            } else {
+              dbSchema.createObjectStore(db, osnName);
+            }
+          });
         };
         req.onsuccess = () => {
             const db = req.result;
