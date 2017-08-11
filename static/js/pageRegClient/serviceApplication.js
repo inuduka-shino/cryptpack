@@ -16,8 +16,39 @@ define((require)=>{
   const cx = cxMng();
   const clntSvr = clientSaver.generate();
 
-  const userID = 'demo01';
-  let theClientID = null;
+  const clientEnv = (()=>{
+    const userId = 'demo01';
+    let aRSAKey = null,
+        clientId = null,
+        userInfo = null;
+
+    async function loadClientEnv() {
+      if (userInfo === null) {
+        userInfo = await clntSvr.loadUserInfo(userId);
+        clientId = userInfo.lastClientId;
+      }
+      if (aRSAKey === null) {
+        aRSAKey = clntSvr.loadRSAKey(clientId);
+      }
+    }
+    function saveClientEnv(cli, rsakey) {
+      clientId = cli;
+      aRSAKey = rsakey;
+      // db 保管
+      clntSvr.saveRSAKey(clientId, aRSAKey);
+      clntSvr.saveUserInfo(userId, {
+        lastClientId: clientId,
+      });
+
+    }
+
+    return {
+      userId,
+      loadClientEnv,
+      saveClientEnv,
+    };
+  })();
+
 
   async function regSeckey() {
     const bits = 1024;
@@ -30,21 +61,21 @@ define((require)=>{
     const publicKeyString = cryptico.publicKeyString(aRSAkey);
 
     // サービス登録
-    const clientId = await cx.regPubKey(userID, publicKeyString);
+    const clientId = await cx.regPubKey(clientEnv.userId, publicKeyString);
 
-    // db 保管
-    await clntSvr.save(clientId, aRSAkey);
-    theClientID = clientId;
+    clientEnv.saveClientEnv(
+      clientId, aRSAkey
+    );
+
   }
 
   function getTestMessages () {
-    const aRSAKeyPrms = clntSvr.load(theClientID);
-    const rcvPrmses = [0, 1, 2].map((testId)=> {
-      return Promise.all([
-          cx.getTestMessage(theClientID, testId),
-          aRSAKeyPrms
-        ]).then(([enctext, aRSAKey])=>{
-        const decObj = cryptico.decrypt(enctext, aRSAKey);
+    const envPrms = clientEnv.loadClientEnv();
+    return [0,1,2].map((testId)=>{
+      return envPrms.then((env) => {
+        return [env, cx.getTestMessage(env.clientId, testId)];
+      }).then(([env,enctext]) => {
+        const decObj = cryptico.decrypt(enctext, env.aRSAKey);
 
         if (decObj.status !== 'success') {
           throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
@@ -53,7 +84,7 @@ define((require)=>{
         return base64Util.decode(decObj.plaintext);
       });
     });
-    return rcvPrmses;
+
   }
 
   return {

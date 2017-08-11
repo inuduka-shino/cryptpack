@@ -87,7 +87,7 @@ define((require) => {
     const tx = db.transaction(osnNames, 'readwrite'),
           store = tx.objectStore(osnName);
     const req = store.put({
-      clientId: key,
+      [dbSchema.schema[osnName].keyPath]: key,
       value
     });
 
@@ -130,8 +130,12 @@ define((require) => {
 
 function generate() {
     return {
-      save: save.bind(null, osnRSAKey),
-      load: load.bind(null, osnRSAKey),
+      saveRSAKey: save.bind(null, osnRSAKey),
+      loadRSAKey: load.bind(null, osnRSAKey),
+      saveUserInfo: save.bind(null, osnUserInfo),
+      loadUserInfo: load.bind(null, osnUserInfo),
+      saveEnv: save.bind(null, osnEnv),
+      loadEnv: load.bind(null, osnEnv),
     };
   }
 

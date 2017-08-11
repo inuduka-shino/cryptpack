@@ -27,6 +27,15 @@ function regPubKey(reqVal) {
 }
 
 async function getTestMessage(reqVal) {
+  if (typeof reqVal === 'undefined') {
+    throw new Error('getTestMessage:undefined argment');
+  }
+  if (typeof reqVal.clientId === 'undefined') {
+    throw new Error('getTestMessage:undefined clientId argment');
+  }
+  if (typeof reqVal.testNum === 'undefined') {
+    throw new Error('getTestMessage:undefined testNum argment');
+  }
   const client = await clientMng.getClient(reqVal.clientId);
 
   const publicKeyString = client.publicKeyString(),
