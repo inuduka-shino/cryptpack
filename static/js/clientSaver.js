@@ -3,8 +3,7 @@
 /*eslint no-console: off */
 /*global define */
 
-define((require) => {
-  const crypticoUtil = require('./crypticoUtil');
+define(() => {
   const
     osnNames = ['n001', 'n002', 'n003'],
     osnRSAKey = osnNames[0],
@@ -81,8 +80,6 @@ define((require) => {
   //let theRSAKey=null;
 
   async function save(osnName, key, value) {
-    console.log('save');
-
     const db = await dbOpen(dbSchema.version);
     const tx = db.transaction(osnNames, 'readwrite'),
           store = tx.objectStore(osnName);
@@ -105,11 +102,9 @@ define((require) => {
         reject(err);
       };
     });
-
   }
 
   async function load(osnName, key) {
-    console.log('load');
     const db = await dbOpen(dbSchema.version);
     const tx = db.transaction(osnNames, 'readwrite'),
           store = tx.objectStore(osnName);
@@ -117,14 +112,13 @@ define((require) => {
     const ret = await new Promise((resolve, reject)=>{
       req.onsuccess = () =>{
         db.close();
-        resolve(crypticoUtil.regenRSAKey(req.result.value));
+        resolve(req.result.value);
       };
       req.onerror = (err) => {
         console.log(err);
         reject(err);
       };
     });
-
     return ret;
   }
 

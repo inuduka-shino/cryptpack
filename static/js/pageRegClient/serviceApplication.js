@@ -6,9 +6,8 @@
 define((require)=>{
   const
         pCryptico = require('cryptico'),
+        crypticoUtil = require('../crypticoUtil'),
         cxMng = require('../cx/cx'),
-        //domUtil = require('./domUtil'),
-        //cryptoTest = require('./cryptoTest'),
         base64Util = require('../base64Util'),
         clientSaver = require('../clientSaver');
 
@@ -28,18 +27,25 @@ define((require)=>{
         clientId = userInfo.lastClientId;
       }
       if (aRSAKey === null) {
-        aRSAKey = clntSvr.loadRSAKey(clientId);
+        const aRSAKeyInfo = await clntSvr.loadRSAKey(clientId);
+        aRSAKey = crypticoUtil.regenRSAKey(aRSAKeyInfo);
       }
+      return {
+        userId,
+        clientId,
+        aRSAKey,
+      };
     }
     function saveClientEnv(cli, rsakey) {
       clientId = cli;
       aRSAKey = rsakey;
       // db 保管
-      clntSvr.saveRSAKey(clientId, aRSAKey);
-      clntSvr.saveUserInfo(userId, {
-        lastClientId: clientId,
-      });
-
+      return Promise.all([
+        clntSvr.saveRSAKey(clientId, aRSAKey),
+        clntSvr.saveUserInfo(userId, {
+          lastClientId: clientId,
+        })
+      ]);
     }
 
     return {
@@ -66,14 +72,15 @@ define((require)=>{
     clientEnv.saveClientEnv(
       clientId, aRSAkey
     );
-
   }
 
   function getTestMessages () {
     const envPrms = clientEnv.loadClientEnv();
     return [0,1,2].map((testId)=>{
       return envPrms.then((env) => {
-        return [env, cx.getTestMessage(env.clientId, testId)];
+        return cx.getTestMessage(env.clientId, testId).then((enctext)=>{
+          return [env, enctext];
+        });
       }).then(([env,enctext]) => {
         const decObj = cryptico.decrypt(enctext, env.aRSAKey);
 
