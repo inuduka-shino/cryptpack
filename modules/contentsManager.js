@@ -7,15 +7,22 @@ function define(func) {
 }
 
 define((require) => {
-  const fs = require('fs'),
-        util = require('util');
-  const fsReadFile = util.promisify(fs.readFile),
-        fsWriteFile = util.promisify(fs.writeFile);
+  const jsonFile = require('./jsonFile');
 
+  function generate(filePath) {
+      const jsonfile = jsonFile(
+        filePath,
+        {
+          aaa:'aaa',
+          bbb:'bbb',
+        }
+      );
 
+    return {
+      load: jsonfile.load,
+      save: jsonfile.save
+    };
+  }
 
-  return {
-      aaa: 'aaa',
-      bbb: 'bbbb',
-  };
+  return generate;
 });
