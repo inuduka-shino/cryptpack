@@ -19,7 +19,7 @@ module.exports = (()=>{
   function genClientId(clientMap) {
     const counter = clientMap.counter + 1;
 
-    if (clientMap.couter > 99999) {
+    if (counter > 99999) {
       throw new Error(`overflow client map count over ${counter}`);
     }
     const counterStr = ('00000' + counter).slice(-5);
