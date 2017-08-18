@@ -9,40 +9,49 @@ const contentsManager = require('../modules/contentsManager'),
 const fsUnlink = util.promisify(fs.unlink);
 
 describe('contents manager TEST', () => {
-  const testfilepath = 'work/contentsManage.json';
+  const testfilepath = 'test/work/contentsManage.json';
 
   it('require js-moduel',() => {
     expect(contentsManager).is.a('Function');
   });
   it('gen instance',() => {
     const contentsMng = contentsManager(testfilepath);
-    expect(contentsMng).has.a.property('load');
-    expect(contentsMng).has.a.property('save');
+    expect(contentsMng).has.a.property('dev');
   });
-  it('init load',async () => {
-    await fsUnlink(testfilepath).catch((err)=>{
-      if (err.code !== 'ENOENT') {
-        throw err;
-      }
+  describe('use file test', () =>{
+    beforeEach(async ()=>{
+      await fsUnlink(testfilepath).catch((err)=>{
+        if (err.code !== 'ENOENT') {
+          throw err;
+        }
+      });
     });
-    const contentsMng = contentsManager(testfilepath);
-    const prms = contentsMng.load();
-    expect(prms).has.a.property('then');
-    const dataInfo = await prms;
-    expect(dataInfo).has.a.property('aaa');
-    expect(dataInfo).has.a.property('bbb');
-  });
-  it('save & load',async () => {
-    await fsUnlink(testfilepath).catch((err)=>{
-      if (err.code !== 'ENOENT') {
-        throw err;
-      }
+
+    it('init load',async () => {
+      const contentsMng = contentsManager(testfilepath);
+      const prms = contentsMng.dev.load();
+      expect(prms).has.a.property('then');
+      await prms;
+      const dataInfo = contentsMng.dev.self.dataInfo;
+      expect(dataInfo).has.a.property('aaa');
+      expect(dataInfo).has.a.property('bbb');
     });
-    const contentsMng = contentsManager(testfilepath);
-    const prms = contentsMng.load();
-    expect(prms).has.a.property('then');
-    const dataInfo = await prms;
-    expect(dataInfo).has.a.property('aaa');
-    expect(dataInfo).has.a.property('bbb');
+    it('save & load',async () => {
+      const contentsMng = contentsManager(testfilepath);
+      const contentsMng2 = contentsManager(testfilepath);
+
+      await contentsMng2.dev.load();
+      const ckData = contentsMng2.dev.self.dataInfo;
+      expect(ckData).has.a.property('aaa');
+
+      contentsMng.dev.self.dataInfo = {
+        xxx: 'xxxx'
+      };
+      await contentsMng.dev.save();
+      await contentsMng2.dev.load();
+      const ckData2 = contentsMng2.dev.self.dataInfo;
+      expect(ckData2).has.not.a.property('aaa');
+      expect(ckData2).has.a.property('xxx');
+    });
   });
 });

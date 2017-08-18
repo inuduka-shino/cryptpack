@@ -31,8 +31,11 @@ define((require) => {
     };
 
     return {
-      load: load.bind(null,self),
-      save: save.bind(null,self),
+      dev: {
+        load: load.bind(null,self),
+        save: save.bind(null,self),
+        self,
+      },
     };
   }
 
