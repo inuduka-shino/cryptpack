@@ -33,8 +33,8 @@ describe('contents manager TEST', () => {
       expect(prms).has.a.property('then');
       await prms;
       const dataInfo = contentsMng.dev.self.dataInfo;
-      expect(dataInfo).has.a.property('aaa');
-      expect(dataInfo).has.a.property('bbb');
+      expect(dataInfo).has.a.property('title');
+      expect(dataInfo).has.a.property('count');
     });
     it('save & load',async () => {
       const contentsMng = contentsManager(testfilepath);
@@ -42,7 +42,7 @@ describe('contents manager TEST', () => {
 
       await contentsMng2.dev.load();
       const ckData = contentsMng2.dev.self.dataInfo;
-      expect(ckData).has.a.property('aaa');
+      expect(ckData).has.a.property('title');
 
       contentsMng.dev.self.dataInfo = {
         xxx: 'xxxx'
@@ -50,7 +50,6 @@ describe('contents manager TEST', () => {
       await contentsMng.dev.save();
       await contentsMng2.dev.load();
       const ckData2 = contentsMng2.dev.self.dataInfo;
-      expect(ckData2).has.not.a.property('aaa');
       expect(ckData2).has.a.property('xxx');
     });
   });
