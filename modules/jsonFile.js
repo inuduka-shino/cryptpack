@@ -30,7 +30,7 @@ define((require)=>{
       })
       .catch((err) => {
         if (err.code === 'ENOENT') {
-          return self.initData;
+          return null;
         }
         throw new Error(`Mapfile read error! err.code=(${err.code}) filepath=(${self.filePath})`);
       })
@@ -48,10 +48,9 @@ define((require)=>{
     );
   }
 
-  function generate(filePath, initData) {
+  function generate(filePath) {
     const self = {
       filePath,
-      initData,
       selfIF: null,
     };
 

@@ -29,18 +29,18 @@ module.exports = (()=>{
 
 
   function generate(clientMapFilePath) {
-    const cmFile = jsonFile(
-        clientMapFilePath,
-        {
-          title: 'client map',
-          counter: 0,
-        }
-      );
+    const cmFile = jsonFile(clientMapFilePath);
     let clientMap = null;
 
     async function registClient(clientInfo) {
       if (clientMap === null) {
         clientMap = await cmFile.load();
+        if (clientMap === null) {
+          clientMap = {
+            title: 'client map',
+            counter: 0,
+          };
+        }
       }
       const [counter, clientId] = genClientId(clientMap);
 

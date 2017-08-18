@@ -20,12 +20,25 @@ describe('contents manager TEST', () => {
     expect(contentsMng).has.a.property('save');
   });
   it('init load',async () => {
-    const contentsMng = contentsManager(testfilepath);
     await fsUnlink(testfilepath).catch((err)=>{
       if (err.code !== 'ENOENT') {
         throw err;
       }
     });
+    const contentsMng = contentsManager(testfilepath);
+    const prms = contentsMng.load();
+    expect(prms).has.a.property('then');
+    const dataInfo = await prms;
+    expect(dataInfo).has.a.property('aaa');
+    expect(dataInfo).has.a.property('bbb');
+  });
+  it('save & load',async () => {
+    await fsUnlink(testfilepath).catch((err)=>{
+      if (err.code !== 'ENOENT') {
+        throw err;
+      }
+    });
+    const contentsMng = contentsManager(testfilepath);
     const prms = contentsMng.load();
     expect(prms).has.a.property('then');
     const dataInfo = await prms;

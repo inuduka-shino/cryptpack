@@ -9,18 +9,30 @@ function define(func) {
 define((require) => {
   const jsonFile = require('./jsonFile');
 
-  function generate(filePath) {
-      const jsonfile = jsonFile(
-        filePath,
-        {
+  async function load(self) {
+    let dataInfo = await self.jsonfile.load();
+
+    if (dataInfo===null) {
+      dataInfo = {
           aaa:'aaa',
           bbb:'bbb',
-        }
-      );
+        };
+    }
+    self.dataInfo = dataInfo;
+  }
+  async function save(self) {
+    await self.jsonfile.save(self.dataInfo);
+  }
+
+  function generate(filePath) {
+    const self = {
+      jsonfile: jsonFile(filePath),
+      dataInfo: null,
+    };
 
     return {
-      load: jsonfile.load,
-      save: jsonfile.save
+      load: load.bind(null,self),
+      save: save.bind(null,self),
     };
   }
 
