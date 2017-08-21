@@ -8,7 +8,6 @@ function define(func) {
 
 define((require) => {
   const jsonFile = require('./jsonFile');
-  const contentsIdBase = 'ACS002';
 
   function generateContentsID(self) {
     self.dataInfo.counter += 1;
@@ -19,7 +18,7 @@ define((require) => {
     }
     const counterStr = ('00000' + counter).slice(-5);
 
-    return [contentsIdBase, 'CA', counterStr].join('');
+    return [self.contentsIdBase, 'CA', counterStr].join('');
 
   }
   async function load(self) {
@@ -33,13 +32,13 @@ define((require) => {
           title:'contents map',
           // for countns id
           counter: 0,
+          contentsInfo: {},
           // {contentsID: {
           //   sourcePath: '....',
           //   destPath: '....',
           // }, ...}
-          contentsInfo: {},
-          // {clientId: [contentsID, ....]',...}
           clientContentMap: {},
+          // {clientId: [contentsID, ....]',...}
         };
     }
     self.dataInfo = dataInfo;
@@ -48,9 +47,16 @@ define((require) => {
     await self.jsonfile.save(self.dataInfo);
   }
 
-  function generate(filePath) {
+  function generate(info) {
+    // info = {
+    //   contentsIdBase,
+    //   jsonFilePath,
+    //   destFileFolderPath,
+    // }
     const self = {
-      jsonfile: jsonFile(filePath),
+      jsonfile: jsonFile(info.jsonFilePath),
+      contentsIdBase: info.contentsIdBase,
+      destFileFolderPath: info.destFileFolderPath,
       dataInfo: null,
     };
 
