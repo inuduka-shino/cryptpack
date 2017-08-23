@@ -56,7 +56,7 @@ describe('contents manager TEST', () => {
       const prms = contentsMng.dev.load();
       expect(prms).has.a.property('then');
       await prms;
-      const dataInfo = contentsMng.dev.self.dataInfo;
+      const dataInfo = contentsMng.dev.cntxt.dataInfo;
       expect(dataInfo).has.a.property('title');
       expect(dataInfo).has.a.property('counter');
     });
@@ -69,7 +69,7 @@ describe('contents manager TEST', () => {
           destFileFolderPath,
         });
 
-        contentsMng.dev.self.dataInfo = {
+        contentsMng.dev.cntxt.dataInfo = {
           xxx: 'xxxx'
         };
         await contentsMng.dev.save();
@@ -81,7 +81,7 @@ describe('contents manager TEST', () => {
           destFileFolderPath,
         });
         await contentsMng2.dev.load();
-        const ckData2 = contentsMng2.dev.self.dataInfo;
+        const ckData2 = contentsMng2.dev.cntxt.dataInfo;
         expect(ckData2).has.a.property('xxx');
       }());
     });

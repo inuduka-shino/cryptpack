@@ -62,5 +62,38 @@ define((require)=>{
     return self.selfIF;
   }
 
+  // saver utilty
+  // Object save&load
+  // addFeature(self)
+  //self: {
+  //  dataInfo,  : plainObject 対象データ
+  //  saver : saver.save/ saver.load
+  //  laod: adding method
+  //  save: adding method
+  //}
+  async function utilLoad(cntxt, initObj) {
+    if (cntxt.dataInfo !== null) {
+      throw new Error('alrady loaded.');
+    }
+    let dataInfo = await cntxt.saver.load();
+
+    if (dataInfo===null) {
+      dataInfo = initObj;
+    }
+    cntxt.dataInfo = dataInfo;
+  }
+  async function utilSave(self) {
+    await self.saver.save(self.dataInfo);
+  }
+
+  function saverFeature(cntxt) {
+    return {
+      load: utilLoad.bind(null, cntxt),
+      save: utilSave.bind(null, cntxt),
+    };
+  }
+
+  generate.saverFeature = saverFeature;
+
   return generate;
 });
