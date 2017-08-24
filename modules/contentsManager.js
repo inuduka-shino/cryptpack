@@ -8,32 +8,8 @@ function define(func) {
 
 define((require) => {
   const jsonFile = require('./jsonFile'),
+        {genProxy} = require('./featureUtil'),
         objectSaver = require('./objectSaver');
-
-  function realPropNameFromMap(propMap, propName) {
-    const realPropName = propMap[propName];
-
-    if (typeof realPropName === 'undefined') {
-      throw new Error(`member ${propName} is no-mapping!`);
-    }
-
-    return realPropName;
-  }
-  function proxyHandler(propMap) {
-    const realPropName = realPropNameFromMap.bind(null, propMap);
-
-    return {
-      get (targetObj, propName) {
-        return targetObj[realPropName(propName)];
-      },
-      set (targetObj, propName, val) {
-        targetObj[realPropName(propName)] = val;
-      },
-    };
-  }
-  function genProxy(targetObj, propMap) {
-    return new Proxy(targetObj, proxyHandler(propMap));
-  }
 
   function generateContentsID(self) {
     self.dataInfo.counter += 1;
@@ -49,7 +25,7 @@ define((require) => {
   }
 
   function generate(info) {
-    // info = {
+    // input: info = {
     //   contentsIdBase,
     //   jsonFilePath,
     //   destFileFolderPath,
@@ -61,25 +37,24 @@ define((require) => {
       destFileFolderPath: info.destFileFolderPath,
     };
 
-    const saver = objectSaver(genProxy(
-                    cntxt,
-                    {
-                      'saver': 'jsonfile',
-                      'dataInfo': 'dataInfo',
-                    }
-                  ));
+    const saver = objectSaver(genProxy(cntxt,
+              {
+                'saver': 'jsonfile',
+                'dataInfo': 'dataInfo',
+              }
+            ));
     const saverLoad = saver.load.bind(null,{
-                        title:'contents map',
-                        // for countns id
-                        counter: 0,
-                        contentsInfo: {},
-                        // {contentsID: {
-                        //   sourcePath: '....',
-                        //   destPath: '....',
-                        // }, ...}
-                        clientContentMap: {},
-                        // {clientId: [contentsID, ....]',...}
-                      });
+              title:'contents map',
+              // for countns id
+              counter: 0,
+              contentsInfo: {},
+              // {contentsID: {
+              //   sourcePath: '....',
+              //   destPath: '....',
+              // }, ...}
+              clientContentMap: {},
+              // {clientId: [contentsID, ....]',...}
+            });
 
     return {
       dev: {
