@@ -7,7 +7,8 @@ function define(func) {
 }
 
 define((require) => {
-  const jsonFile = require('./jsonFile');
+  const jsonFile = require('./jsonFile'),
+        objectSaver = require('./objectSaver');
 
   function realPropNameFromMap(propMap, propName) {
     const realPropName = propMap[propName];
@@ -60,7 +61,7 @@ define((require) => {
       destFileFolderPath: info.destFileFolderPath,
     };
 
-    const saver = jsonFile.saverFeature(genProxy(
+    const saver = objectSaver(genProxy(
                     cntxt,
                     {
                       'saver': 'jsonfile',
