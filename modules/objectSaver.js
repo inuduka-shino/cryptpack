@@ -17,26 +17,36 @@ function define(func) {
   module.exports = func(require);
 }
 
-define(()=>{
-  async function load(cntxt, initObj) {
-    if (cntxt.dataInfo !== null) {
-      throw new Error('alrady loaded.');
-    }
-    let dataInfo = await cntxt.saver.load();
+define((require)=>{
+  const featureUtil = require('./featureUtil');
 
-    if (dataInfo===null) {
-      dataInfo = initObj;
-    }
-    cntxt.dataInfo = dataInfo;
-  }
-  async function save(self) {
-    await self.saver.save(self.dataInfo);
-  }
+  //eslint-disable-next-line max-params
+  return (cntxt, saver, propMap, initData)=>{
+    const saveImage = featureUtil.genProxy(cntxt, propMap);
+    let loaded = false;
 
-  return function (cntxt) {
+    function init() {
+      let loadData = null;
+
+      if (loaded) {
+        return;
+      }
+      loadData = saver.load();
+      if (loadData === null) {
+        loadData = initData;
+      }
+      Object.entries(loadData).forEach(([key,val])=>{
+          saveImage[key] = val;
+      });
+      loaded = true;
+    }
+    function flush() {
+        saver.save(saveImage);
+    }
+
     return {
-      load: load.bind(null, cntxt),
-      save: save.bind(null, cntxt),
+      init,
+      flush,
     };
   };
 });
