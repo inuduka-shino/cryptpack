@@ -8,6 +8,7 @@ function define(func) {
 
 define((require) => {
   const jsonFile = require('./jsonFile'),
+        //{genProxy} = require('./featureUtil'),
         objectSaver = require('./objectSaver');
 
   function generateContentsID(cntxt) {
