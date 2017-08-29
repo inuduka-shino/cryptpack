@@ -2,11 +2,7 @@
 /*eslint-env node */
 /*eslint-disable no-console: "warn" */
 
-const fs = require('fs'),
-      util = require('util');
-
-const fsReadFile = util.promisify(fs.readFile),
-      fsWriteFile = util.promisify(fs.writeFile);
+const jsonFile = require('./jsonFile');
 
 const clientIdBase = 'ASS002';
 
@@ -20,84 +16,45 @@ module.exports = (()=>{
     };
   }
 
-function genClientId(clientMap) {
-  const counter = clientMap.counter + 1;
+  function genClientId(clientMap) {
+    const counter = clientMap.counter + 1;
 
-  if (clientMap.couter > 99999) {
-    throw new Error(`overflow client map count over ${counter}`);
+    if (counter > 99999) {
+      throw new Error(`overflow client map count over ${counter}`);
+    }
+    const counterStr = ('00000' + counter).slice(-5);
+
+    return [counter, clientIdBase + 'CA' + counterStr];
   }
-  const counterStr = ('00000' + counter).slice(-5);
 
-  return [counter, clientIdBase + 'CA' + counterStr];
-}
-
-function clientMapFile(mapFilePath) {
-    function loadMap() {
-      const loadPromise = fsReadFile(
-        mapFilePath,
-        {
-            flag: 'r',
-            encoding: 'utf8'
-          }
-        );
-
-      return (
-        loadPromise
-        .then((data) => {
-            return JSON.parse(data);
-        })
-        .catch((err) => {
-          if (err.code === 'ENOENT') {
-
-            return {
-              title: 'client map',
-              counter: 0,
-            };
-          }
-          throw new Error(`Mapfile read error! err.code=(${err.code}) filepath=(${mapFilePath})`);
-        })
-      );
-    }
-
-    function saveMap(data) {
-      return fsWriteFile(
-        mapFilePath,
-        JSON.stringify(data),
-        {
-          flag: 'w',
-          encoding: 'utf8'
-        }
-      );
-    }
-
-    return {
-      loadMap,
-      saveMap
-    };
-
-}
 
   function generate(clientMapFilePath) {
-    const cmFile = clientMapFile(clientMapFilePath);
+    const cmFile = jsonFile(clientMapFilePath);
     let clientMap = null;
 
     async function registClient(clientInfo) {
       if (clientMap === null) {
-        clientMap = await cmFile.loadMap();
+        clientMap = await cmFile.load();
+        if (clientMap === null) {
+          clientMap = {
+            title: 'client map',
+            counter: 0,
+          };
+        }
       }
       const [counter, clientId] = genClientId(clientMap);
 
       clientMap.counter = counter;
       clientMap[clientId] = genClientData(clientId, clientInfo);
 
-      await cmFile.saveMap(clientMap);
+      await cmFile.save(clientMap);
 
       return clientId;
     }
 
     async function getClient(clientId) {
       if (clientMap === null) {
-        clientMap = await cmFile.loadMap();
+        clientMap = await cmFile.load();
       }
 
       return {
@@ -113,7 +70,5 @@ function clientMapFile(mapFilePath) {
     };
   }
 
-  return {
-      generate
-    };
+  return {generate};
 })();

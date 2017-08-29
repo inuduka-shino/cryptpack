@@ -48,6 +48,14 @@ async function getTestMessage(reqVal) {
   throw new Error(`cryptico encrypt Error: bad status ${encObj.status}`);
 }
 
+async function getIndex(reqVal) {
+  await aaa(reqVal);
+  return {
+    index: '',
+    path: '',
+  };
+}
+
 function services(command ,reqVal) {
   return (() => {
     try {
@@ -59,6 +67,9 @@ function services(command ,reqVal) {
       }
       if (command==='getTestMessage') {
         return getTestMessage(reqVal);
+      }
+      if (command==='getIndex') {
+        return getIndex(reqVal);
       }
       throw new Error(`unkown command.[${command}]`);
     } catch (err) {
