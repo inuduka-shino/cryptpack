@@ -33,25 +33,29 @@ describe('obecjtSaver TEST', () => {
             load: dummyLoad,
             save: dummySave,
           },
-          initData = {
-            'b': 'BBB'
-          },
           propMap={
             'A': 'a',
-            'B': 'b'
+            'B': 'b',
           },
-          objSaver = objectSaver(
-            cntxt, saver,
-            initData,
-            propMap);
+          initSaveData = {
+            'A': 'initA',
+            'B': 'initB',
+          },
+          objSaver = objectSaver({
+            cntxt,
+            saver,
+            propMap,
+            initSaveData,
+          });
 
     it('check init',() => {
       objSaver.init();
-      expect(cntxt.b).is.equal('BBB');
+      expect(cntxt.b).is.equal('initB');
+      expect(cntxt.a).is.equal('initA');
     });
     it('check save',() => {
       cntxt.a = 'NEW A';
-      objSaver.save();
+      objSaver.flush();
       expect(JSON.parse(dummySaverData).A).is.equal('NEW A');
     });
     it('check init2',() => {
@@ -59,13 +63,17 @@ describe('obecjtSaver TEST', () => {
         'a': 'OLD',
         'b': 'OLD',
       };
-      const objSaver2 = objectSaver(
-        cntxt2, saver,
-        initData,
-        propMap);
+      const objSaver2 = objectSaver({
+        cntxt: cntxt2,
+        saver,
+        propMap,
+        initSaveData,
+      });
+
+      dummySaverData = '{"A":"NEW A","B":"NEW B"}';
       objSaver2.init();
       expect(cntxt2.a).is.equal('NEW A');
-      expect(cntxt2.b).is.equal('OLD');
+      expect(cntxt2.b).is.equal('NEW B');
     });
   });
 });

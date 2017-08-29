@@ -17,31 +17,32 @@ function define(func) {
   module.exports = func(require);
 }
 
-define((require)=>{
-  const featureUtil = require('./featureUtil');
-
+define(()=>{
   //eslint-disable-next-line max-params
-  return (cntxt, saver, propMap, initData)=>{
-    const saveImage = featureUtil.genProxy(cntxt, propMap);
+  return ({cntxt, saver, propMap, initSaveData})=>{
     let loaded = false;
 
     function init() {
-      let loadData = null;
-
       if (loaded) {
         return;
       }
-      loadData = saver.load();
+      let loadData = saver.load();
+
       if (loadData === null) {
-        loadData = initData;
+        loadData = initSaveData;
       }
-      Object.entries(loadData).forEach(([key,val])=>{
-          saveImage[key] = val;
+      Object.entries(propMap).forEach(([sKey,cKey])=>{
+          cntxt[cKey] = loadData[sKey];
       });
       loaded = true;
     }
     function flush() {
-        saver.save(saveImage);
+      const saveImage={};
+
+      Object.entries(propMap).forEach(([sKey,cKey])=>{
+          saveImage[sKey] = cntxt[cKey];
+      });
+      saver.save(saveImage);
     }
 
     return {
