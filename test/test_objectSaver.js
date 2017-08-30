@@ -48,10 +48,20 @@ describe('obecjtSaver TEST', () => {
             initSaveData,
           });
 
+    it('check init Zero',() => {
+      const objSaver0 = objectSaver({
+              cntxt,
+              saver,
+              propMap,
+            });
+      objSaver0.init();
+      expect(cntxt.a).is.equal('AAA');
+      expect(cntxt.a1).is.equal('xxx');
+    });
     it('check init',() => {
       objSaver.init();
-      expect(cntxt.b).is.equal('initB');
       expect(cntxt.a).is.equal('initA');
+      expect(cntxt.b).is.equal('initB');
     });
     it('check save',() => {
       cntxt.a = 'NEW A';
@@ -66,14 +76,13 @@ describe('obecjtSaver TEST', () => {
       const objSaver2 = objectSaver({
         cntxt: cntxt2,
         saver,
-        propMap,
-        initSaveData,
+        propMap
       });
 
-      dummySaverData = '{"A":"NEW A","B":"NEW B"}';
+      dummySaverData = '{"A":"NEW AA","B":"NEW BB"}';
       objSaver2.init();
-      expect(cntxt2.a).is.equal('NEW A');
-      expect(cntxt2.b).is.equal('NEW B');
+      expect(cntxt2.a).is.equal('NEW AA');
+      expect(cntxt2.b).is.equal('NEW BB');
     });
   });
 });

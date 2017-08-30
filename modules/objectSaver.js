@@ -1,17 +1,16 @@
 /* ObjectSaver.js */
 /*eslint-env node */
 // Object saver utilty
-// Object save&load
-// saverFeature(cntxt)
-//cntxt: {
-//  dataInfo,  : plainObject 対象データ
-//  saver : saver.save/ saver.load
-//}
-// output:
-//{
-//  laod(initObj): load Object from saver or initObj
-//  save: save Object
-//}
+// Object info to saved
+// ObjectSaver(paramObj)
+// paramObj: {
+// cntxt, saver, propMap, initSaveData
+// }
+// return val
+// {
+//   init()
+//   flush()
+// }
 
 function define(func) {
   module.exports = func(require);
@@ -20,25 +19,36 @@ function define(func) {
 define(()=>{
   //eslint-disable-next-line max-params
   return ({cntxt, saver, propMap, initSaveData})=>{
-    let loaded = false;
+    let saveImage = null;
 
     function init() {
-      if (loaded) {
-        return;
+      if (saveImage!==null) {
+        throw new Error('already init');
       }
-      let loadData = saver.load();
+      const loadData = saver.load();
 
       if (loadData === null) {
-        loadData = initSaveData;
+        if (typeof initSaveData === 'undefined') {
+          saveImage = {};
+        } else {
+          saveImage = initSaveData;
+        }
+      } else {
+        saveImage = loadData;
       }
       Object.entries(propMap).forEach(([sKey,cKey])=>{
-          cntxt[cKey] = loadData[sKey];
-      });
-      loaded = true;
-    }
-    function flush() {
-      const saveImage={};
+        const val = saveImage[sKey];
 
+        if (typeof val !== 'undefined') {
+          cntxt[cKey] = val;
+        }
+      });
+    }
+
+    function flush() {
+      if (saveImage === null) {
+        throw new Error('alrady not init');
+      }
       Object.entries(propMap).forEach(([sKey,cKey])=>{
           saveImage[sKey] = cntxt[cKey];
       });
