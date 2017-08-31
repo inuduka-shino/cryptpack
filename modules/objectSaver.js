@@ -18,7 +18,7 @@ function define(func) {
 
 define(()=>{
   //eslint-disable-next-line max-params
-  return ({cntxt, saver, propMap, initSaveData})=>{
+  return ({cntxt, saver, propList, initSaveData})=>{
     let saveImage = null;
 
     function init() {
@@ -36,11 +36,11 @@ define(()=>{
       } else {
         saveImage = loadData;
       }
-      Object.entries(propMap).forEach(([sKey,cKey])=>{
-        const val = saveImage[sKey];
+      propList.forEach((propName)=>{
+        const val = saveImage[propName];
 
         if (typeof val !== 'undefined') {
-          cntxt[cKey] = val;
+          cntxt[propName] = val;
         }
       });
     }
@@ -49,8 +49,8 @@ define(()=>{
       if (saveImage === null) {
         throw new Error('alrady not init');
       }
-      Object.entries(propMap).forEach(([sKey,cKey])=>{
-          saveImage[sKey] = cntxt[cKey];
+      propList.forEach((propName)=>{
+          saveImage[propName] = cntxt[propName];
       });
       saver.save(saveImage);
     }
