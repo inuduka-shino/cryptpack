@@ -8,7 +8,6 @@ function define(func) {
 
 define((require) => {
   const jsonFile = require('./jsonFile'),
-        {genProxy} = require('./featureUtil'),
         objectSaver = require('./objectSaver');
 
   function generateContentsID(cntxt) {
@@ -32,60 +31,40 @@ define((require) => {
     //   destFileFolderPath,
     // }
     const cntxt = {
-      saverInfo: null,
-      //contentsIdBase: info.contentsIdBase,
-      //destFileFolderPath: info.destFileFolderPath,
-    };
-    const jsonfile = jsonFile(info.jsonFilePath),
-          cntxt = {
-          },
-          loaded = false,
-          initSaveData = {
-            title:'contents map',
-            // for countns id
-            counter: 0,
-            contentsInfo: {},
-            // {contentsID: {
-            //   sourcePath: '....',
-            //   destPath: '....',
-            // }, ...}
-            clientContentMap: {},
-            // {clientId: [contentsID, ....]',...}
-          };
+          saverInfo: null,
+          //contentsIdBase: info.contentsIdBase,
+          //destFileFolderPath: info.destFileFolderPath,
+          // for countns id
+          counter: 0,
+          contentsInfo: {},
+          // {contentsID: {
+          //   sourcePath: '....',
+          //   destPath: '....',
+          // }, ...}
+          clientContentMap: {},
+          // {clientId: [contentsID, ....]',...}
+        },
+        propMap = [
+          'counter',
+          'contentsInfo',
+          'clientContentMap',
+        ].reduce((o,name)=>{
+          o[name] = name;
+
+          return o;
+        },{}),
+        initSaveData = {
+          //
+          title:'contents map',
+        };
 
     const saver = objectSaver({
-              save: jsonfile.save,
-              load: jsonfile.load,
-              targetData,
-              initData
-            });
+        cntxt,
+        saver: jsonFile(info.jsonFilePath),
+        propMap,
+        initSaveData
+      });
 
-    const genContentsID = generateContentsID(
-
-    );
-    const saver = ((cntxt, mapHandler)=>{
-      const saveImage = new Proxy(cntxt, mapHandler);
-      function init() {
-        if (cntxt.loaded) {
-          return;
-        }
-        const loadData = jsonfile.load();
-        if (loadData === null) {
-          loadData = initData;
-        }
-        Object.entries(loadData).forEach(([key,val])={
-            saveImage[key] = val;
-        });
-        cntxt.loaded = true;
-      }
-      function flush() {
-          jsonfile.save(saveImage);
-      }
-      return {
-        init,
-        flush,
-      }
-    })();
     return {
       dev: {
         init: saver.init,

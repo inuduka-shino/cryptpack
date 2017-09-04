@@ -10,7 +10,9 @@ describe('obecjtSaver TEST', () => {
     expect(objectSaver).is.a('Function');
   });
   it('gen instance',() => {
-    const saver = objectSaver({},{},{},{});
+    const saver = objectSaver({
+      propList: []
+    });
     expect(saver).has.a.property('init');
     expect(saver).has.a.property('flush');
   });
@@ -89,9 +91,31 @@ describe('obecjtSaver TEST', () => {
             'aa': 'INIT A'
           },
         'b': 'INIT B',
+      };
+      const objSaver = objectSaver({
+        cntxt,
+        saver,
+        propList: ['a.aa', 'b'],
+      });
+
+      dummySaverData = '{"a":{"aa":"NEW AA"} ,"c":{"cc": "NEW CC"}}';
+      objSaver.init();
+
+      expect(cntxt.a.aa).is.equal('NEW AA');
+      cntxt.a.aa = 'N-AAA';
+      objSaver.flush();
+      expect(JSON.parse(dummySaverData).a.aa).is.equal('N-AAA');
+
+    });
+    it('use Proxy',() => {
+      const cntxt = {
+        'a': {
+            'aa': 'INIT A'
+          },
+        'b': 'INIT B',
         'CC': 'INIT C',
       };
-      const handler =  {
+      const handler = {
         get (cntxt, name) {
           if (name === 'a') {
             return cntxt.a.aa;

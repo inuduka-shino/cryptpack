@@ -21,6 +21,50 @@ define(()=>{
   return ({cntxt, saver, propList, initSaveData})=>{
     let saveImage = null;
 
+    const propUtil = ((propNameList)=>{
+      const propStruct = propNameList.map((propName)=>{
+        const propNameStruct = propName.split('.');
+
+        return [propNameStruct, propNameStruct.length - 1];
+      });
+
+      function getVal(propNameList, rootObj) {
+        return propNameList.reduce((obj, propName)=>{
+          return obj[propName];
+        }, rootObj);
+      }
+      //eslint-disable-next-line max-params
+      function setVal(propNameList, lastIndex, rootObj, val) {
+        propNameList.reduce((obj, propName, index)=>{
+          if (index === lastIndex) {
+            obj[propName] = val;
+
+            return null;
+          }
+
+          return obj[propName];
+        }, rootObj);
+
+      }
+
+      function genMemberObj([propNameList, lastIndex]) {
+        return {
+          getVal: getVal.bind(null, propNameList),
+          setVal: setVal.bind(null, propNameList, lastIndex),
+        };
+      }
+      function forEach(func) {
+        propStruct.forEach((propNameStruct)=>{
+          return func(genMemberObj(propNameStruct));
+        });
+      }
+
+      return {
+        //
+        forEach,
+      };
+    })(propList);
+
     function init() {
       if (saveImage!==null) {
         throw new Error('already init');
@@ -36,11 +80,11 @@ define(()=>{
       } else {
         saveImage = loadData;
       }
-      propList.forEach((propName)=>{
-        const val = saveImage[propName];
+      propUtil.forEach((member)=>{
+        const val = member.getVal(saveImage);
 
         if (typeof val !== 'undefined') {
-          cntxt[propName] = val;
+          member.setVal(cntxt, val);
         }
       });
     }
@@ -49,8 +93,10 @@ define(()=>{
       if (saveImage === null) {
         throw new Error('alrady not init');
       }
-      propList.forEach((propName)=>{
-          saveImage[propName] = cntxt[propName];
+      propUtil.forEach((member)=>{
+        const val = member.getVal(cntxt);
+
+        member.setVal(saveImage, val);
       });
       saver.save(saveImage);
     }
