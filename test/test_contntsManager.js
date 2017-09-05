@@ -7,7 +7,8 @@ const contentsManager = require('../modules/contentsManager'),
       fs = require('fs');
 
 const fsUnlink = util.promisify(fs.unlink),
-      fsMkdir = util.promisify(fs.mkdir);
+      fsMkdir = util.promisify(fs.mkdir),
+      noop= ()=>{}; //eslint-disable-line no-empty-function, func-style
 
 function mkdirForce(dirpath) {
   return fsMkdir(dirpath).catch((err)=>{
@@ -47,43 +48,15 @@ describe('contents manager TEST', () => {
       });
     });
 
-    it('init load',async () => {
+    it('reist',async () => {
       const contentsMng = contentsManager({
         contentsIdBase: 'TEST02',
         jsonFilePath: testfilepath,
         destFileFolderPath,
       });
-      const prms = contentsMng.dev.load();
-      expect(prms).has.a.property('then');
-      await prms;
-      const dataInfo = contentsMng.dev.cntxt.dataInfo;
-      expect(dataInfo).has.a.property('title');
-      expect(dataInfo).has.a.property('counter');
+      contentsMng.regist();
+
     });
 
-    it('save & load',async () => {
-      await (async function () {
-        const contentsMng = contentsManager({
-          contentsIdBase: 'TEST02',
-          jsonFilePath: testfilepath,
-          destFileFolderPath,
-        });
-
-        contentsMng.dev.cntxt.dataInfo = {
-          xxx: 'xxxx'
-        };
-        await contentsMng.dev.save();
-      }());
-      await (async function () {
-        const contentsMng2 = contentsManager({
-          contentsIdBase: 'TEST02',
-          jsonFilePath: testfilepath,
-          destFileFolderPath,
-        });
-        await contentsMng2.dev.load();
-        const ckData2 = contentsMng2.dev.cntxt.dataInfo;
-        expect(ckData2).has.a.property('xxx');
-      }());
-    });
   });
 });

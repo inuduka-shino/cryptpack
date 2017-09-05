@@ -8,7 +8,6 @@ function define(func) {
 
 define((require) => {
   const jsonFile = require('./jsonFile'),
-        //{genProxy} = require('./featureUtil'),
         objectSaver = require('./objectSaver');
 
   function generateContentsID(cntxt) {
@@ -29,31 +28,27 @@ define((require) => {
     // input: info = {
     //   contentsIdBase,
     //   jsonFilePath,
-    //   destFileFolderPath,
+    //   destFileBasePath,
     // }
     const cntxt = {
-          saverInfo: null,
           //contentsIdBase: info.contentsIdBase,
           //destFileFolderPath: info.destFileFolderPath,
           // for countns id
           counter: 0,
           contentsInfo: {},
           // {contentsID: {
+          //   clientId: '....',
           //   sourcePath: '....',
           //   destPath: '....',
           // }, ...}
           clientContentMap: {},
           // {clientId: [contentsID, ....]',...}
         },
-        propMap = [
+        savePropList = [
           'counter',
           'contentsInfo',
           'clientContentMap',
-        ].reduce((o,name)=>{
-          o[name] = name;
-
-          return o;
-        },{}),
+        ],
         initSaveData = {
           //
           title:'contents map',
@@ -62,18 +57,42 @@ define((require) => {
     const saver = objectSaver({
         cntxt,
         saver: jsonFile(info.jsonFilePath),
-        propMap,
+        propList: savePropList,
         initSaveData
       });
 
+    saver.init();
+
+    function registContents(clientId, srcPath) {
+      const contentsId = generateContentsID(cntxt);
+
+      console.log(`clientId=${clientId}`);
+      console.log(`srcPath=${srcPath}`);
+      console.log(`contentsId=${contentsId}`);
+
+      if (typeof cntxt.contentsInfo[contentsId] !== 'undefined') {
+        throw new Error(`alrady contentsId exist. (${contentsId})`);
+      }
+      cntxt.contentsInfo[contentsId] = {
+        clientId,
+        sourcePath: srcPath,
+        //   destPath: '....',
+      };
+      if (typeof cntxt.clientContentMap[clientId] === 'undefined') {
+        cntxt.clientContentMap[clientId] = [];
+      }
+      cntxt.clientContentMap[clientId].push(contentsId);
+
+      return contentsId;
+    }
+
     return {
       dev: {
-        init: saver.init,
-        save: saver.save,
         generateContentsID: generateContentsID.bind(null,cntxt),
         cntxt,
       },
-
+      registContents,
+      // getContentsInfo,
     };
   }
 
