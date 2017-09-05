@@ -169,5 +169,30 @@ describe('obecjtSaver TEST', () => {
       expect(cntxt2.CC).is.equal('INIT C');
 
     });
+    it('subObject2',() => {
+      const cntxt = {
+        'a': {
+            'aa': 'INIT A'
+          },
+        'b': 'INIT B',
+      };
+      const objSaver = objectSaver({
+        cntxt,
+        saver,
+        propList: ['a', 'b'],
+      });
+
+      dummySaverData = '{"a":{"aa":"NEW AA", "ac":"NEW AC"} ,"c":{"cc": "NEW CC"}}';
+      objSaver.init();
+      expect(cntxt.a.aa).is.equal('NEW AA');
+      expect(cntxt.a.ac).is.equal('NEW AC');
+
+      cntxt.a.aa = 'N-AAA';
+      cntxt.a.ab = 'N-ABB';
+      objSaver.flush();
+      expect(JSON.parse(dummySaverData).a.aa).is.equal('N-AAA');
+      expect(JSON.parse(dummySaverData).a.ab).is.equal('N-ABB');
+
+    });
   });
 });
