@@ -1,17 +1,16 @@
 /* ObjectSaver.js */
 /*eslint-env node */
 // Object saver utilty
-// Object save&load
-// saverFeature(cntxt)
-//cntxt: {
-//  dataInfo,  : plainObject 対象データ
-//  saver : saver.save/ saver.load
-//}
-// output:
-//{
-//  laod(initObj): load Object from saver or initObj
-//  save: save Object
-//}
+// Object info to saved
+// ObjectSaver(paramObj)
+// paramObj: {
+// cntxt, saver, propMap, initSaveData
+// }
+// return val
+// {
+//   init()
+//   flush()
+// }
 
 function define(func) {
   module.exports = func(require);
@@ -19,28 +18,85 @@ function define(func) {
 
 define(()=>{
   //eslint-disable-next-line max-params
-  return ({cntxt, saver, propMap, initSaveData})=>{
-    let loaded = false;
+  return ({cntxt, saver, propList, initSaveData})=>{
+    let saveImage = null;
+
+    const propUtil = ((propNameList)=>{
+      const propStruct = propNameList.map((propName)=>{
+        const propNameStruct = propName.split('.');
+
+        return [propNameStruct, propNameStruct.length - 1];
+      });
+
+      function getVal(propNameList, rootObj) {
+        return propNameList.reduce((obj, propName)=>{
+          return obj[propName];
+        }, rootObj);
+      }
+      //eslint-disable-next-line max-params
+      function setVal(propNameList, lastIndex, rootObj, val) {
+        propNameList.reduce((obj, propName, index)=>{
+          if (index === lastIndex) {
+            obj[propName] = val;
+
+            return null;
+          }
+
+          return obj[propName];
+        }, rootObj);
+
+      }
+
+      function genMemberObj([propNameList, lastIndex]) {
+        return {
+          getVal: getVal.bind(null, propNameList),
+          setVal: setVal.bind(null, propNameList, lastIndex),
+        };
+      }
+      function forEach(func) {
+        propStruct.forEach((propNameStruct)=>{
+          return func(genMemberObj(propNameStruct));
+        });
+      }
+
+      return {
+        //
+        forEach,
+      };
+    })(propList);
 
     function init() {
-      if (loaded) {
-        return;
+      if (saveImage!==null) {
+        throw new Error('already init');
       }
-      let loadData = saver.load();
+      const loadData = saver.load();
 
       if (loadData === null) {
-        loadData = initSaveData;
+        if (typeof initSaveData === 'undefined') {
+          saveImage = {};
+        } else {
+          saveImage = initSaveData;
+        }
+      } else {
+        saveImage = loadData;
       }
-      Object.entries(propMap).forEach(([sKey,cKey])=>{
-          cntxt[cKey] = loadData[sKey];
-      });
-      loaded = true;
-    }
-    function flush() {
-      const saveImage={};
+      propUtil.forEach((member)=>{
+        const val = member.getVal(saveImage);
 
-      Object.entries(propMap).forEach(([sKey,cKey])=>{
-          saveImage[sKey] = cntxt[cKey];
+        if (typeof val !== 'undefined') {
+          member.setVal(cntxt, val);
+        }
+      });
+    }
+
+    function flush() {
+      if (saveImage === null) {
+        throw new Error('alrady not init');
+      }
+      propUtil.forEach((member)=>{
+        const val = member.getVal(cntxt);
+
+        member.setVal(saveImage, val);
       });
       saver.save(saveImage);
     }
