@@ -48,29 +48,29 @@ describe('obecjtSaver TEST', () => {
             initSaveData,
           });
 
-    it('check init without overwrite',() => {
+    it('check init without overwrite',async () => {
       const objSaver0 = objectSaver({
               cntxt,
               saver,
               propList,
               // no init data
             });
-      objSaver0.init();
+      await objSaver0.init();
       expect(cntxt.a).is.equal('AAA');
       expect(cntxt.b).is.a('undefined');
       expect(cntxt.a1).is.equal('xxx');
     });
-    it('check init',() => {
-      objSaver.init();
+    it('check init',async () => {
+      await objSaver.init();
       expect(cntxt.a).is.equal('initA');
       expect(cntxt.b).is.equal('initB');
     });
-    it('check save',() => {
+    it('check save',async () => {
       cntxt.a = 'NEW A';
-      objSaver.flush();
+      await objSaver.flush();
       expect(JSON.parse(dummySaverData).a).is.equal('NEW A');
     });
-    it('check init2',() => {
+    it('check init2',async () => {
       const cntxt2 = {
         'a': 'OLD',
         'b': 'OLD',
@@ -82,11 +82,11 @@ describe('obecjtSaver TEST', () => {
       });
 
       dummySaverData = '{"a":"NEW AA","b":"NEW BB"}';
-      objSaver2.init();
+      await objSaver2.init();
       expect(cntxt2.a).is.equal('NEW AA');
       expect(cntxt2.b).is.equal('NEW BB');
     });
-    it('subObject',() => {
+    it('subObject',async () => {
       const cntxt = {
         'a': {
             'aa': 'INIT A'
@@ -100,15 +100,15 @@ describe('obecjtSaver TEST', () => {
       });
 
       dummySaverData = '{"a":{"aa":"NEW AA"} ,"c":{"cc": "NEW CC"}}';
-      objSaver.init();
+      await objSaver.init();
 
       expect(cntxt.a.aa).is.equal('NEW AA');
       cntxt.a.aa = 'N-AAA';
-      objSaver.flush();
+      await objSaver.flush();
       expect(JSON.parse(dummySaverData).a.aa).is.equal('N-AAA');
 
     });
-    it('use Proxy',() => {
+    it('use Proxy',async () => {
       const cntxt = {
         'a': {
             'aa': 'INIT A'
@@ -147,8 +147,8 @@ describe('obecjtSaver TEST', () => {
       });
 
       dummySaverData = null;
-      objSaver.init();
-      objSaver.flush();
+      await objSaver.init();
+      await objSaver.flush();
       const saveImage = JSON.parse(dummySaverData);
       expect(saveImage.a).is.equal('INIT A');
       expect(saveImage.b).is.equal('INIT B');
@@ -164,13 +164,13 @@ describe('obecjtSaver TEST', () => {
         saver,
         propList: ['a', 'b', 'c'],
       });
-      objSaver2.init();
+      await objSaver2.init();
       expect(cntxt2.a.aa).is.equal('INIT A');
       expect(cntxt2.b).is.equal('INIT B');
       expect(cntxt2.CC).is.equal('INIT C');
 
     });
-    it('subObject2',() => {
+    it('subObject2',async () => {
       const cntxt = {
         'a': {
             'aa': 'INIT A'
@@ -184,16 +184,15 @@ describe('obecjtSaver TEST', () => {
       });
 
       dummySaverData = '{"a":{"aa":"NEW AA", "ac":"NEW AC"} ,"c":{"cc": "NEW CC"}}';
-      objSaver.init();
+      await objSaver.init();
       expect(cntxt.a.aa).is.equal('NEW AA');
       expect(cntxt.a.ac).is.equal('NEW AC');
 
       cntxt.a.aa = 'N-AAA';
       cntxt.a.ab = 'N-ABB';
-      objSaver.flush();
+      await objSaver.flush();
       expect(JSON.parse(dummySaverData).a.aa).is.equal('N-AAA');
       expect(JSON.parse(dummySaverData).a.ab).is.equal('N-ABB');
-
     });
   });
 });
