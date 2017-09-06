@@ -65,11 +65,11 @@ define(()=>{
       };
     })(propList);
 
-    function init() {
+    async function init() {
       if (saveImage!==null) {
         throw new Error('already init');
       }
-      const loadData = saver.load();
+      const loadData = await saver.load();
 
       if (loadData === null) {
         if (typeof initSaveData === 'undefined') {
@@ -89,16 +89,16 @@ define(()=>{
       });
     }
 
-    function flush() {
+    async function flush() {
       if (saveImage === null) {
-        throw new Error('alrady not init');
+        throw new Error('not init, yet');
       }
       propUtil.forEach((member)=>{
         const val = member.getVal(cntxt);
 
         member.setVal(saveImage, val);
       });
-      saver.save(saveImage);
+      await saver.save(saveImage);
     }
 
     return {
