@@ -4,7 +4,8 @@
 const contentsManager = require('../modules/contentsManager'),
       expect = require('chai').expect,
       util = require('util'),
-      fs = require('fs');
+      fs = require('fs'),
+      jsonFile = require('../modules/jsonFile');
 
 const fsUnlink = util.promisify(fs.unlink),
       fsMkdir = util.promisify(fs.mkdir),
@@ -18,10 +19,22 @@ function mkdirForce(dirpath) {
   });
 }
 
+
 describe('contents manager TEST', () => {
   const workFolderPath = 'test/work',
         testfilepath = `${workFolderPath}/contentsManage.json`,
-        destFileFolderPath = `${workFolderPath}/dest`;
+        destFileFolderPath = `${workFolderPath}/dest`,
+        contentsIdBase='TEST02_';
+
+  async function defaultGen() {
+    const contentsMng = contentsManager({
+      contentsIdBase,
+      jsonFilePath: testfilepath,
+      destFileFolderPath,
+    });
+    await contentsMng.init();
+    return contentsMng;
+  }
 
   before(async ()=>{
     await mkdirForce(workFolderPath);
@@ -33,12 +46,15 @@ describe('contents manager TEST', () => {
   });
   it('gen instance',() => {
     const contentsMng = contentsManager({
-      contentsIdBase: 'TEST02',
+      contentsIdBase,
       jsonFilePath: testfilepath,
       destFileFolderPath,
     });
     expect(contentsMng).has.a.property('dev');
+    expect(contentsMng).has.a.property('init');
+    expect(contentsMng).has.a.property('regist');
   });
+
   describe('use file test', () =>{
     beforeEach(async ()=>{
       await fsUnlink(testfilepath).catch((err)=>{
@@ -48,14 +64,20 @@ describe('contents manager TEST', () => {
       });
     });
 
-    it('reist',async () => {
-      const contentsMng = contentsManager({
-        contentsIdBase: 'TEST02',
-        jsonFilePath: testfilepath,
-        destFileFolderPath,
-      });
-      contentsMng.regist();
+    it('init',async ()=>{
+      const contentsMng = await defaultGen();
+      expect(contentsMng.dev.cntxt.counter).is.equal(0);
+    });
 
+    it('regist',async ()=>{
+      const contentsMng = await defaultGen();
+      const cntntId = await contentsMng.regist('CI9999','sp/aaa/bbb');
+
+      expect(cntntId).is.equal(`${contentsIdBase}00001`);
+
+      const saveData = await jsonFile(testfilepath).load();
+      expect(saveData.title).is.equal('contents map');
+      expect(saveData.counter).is.equal(1);
     });
 
   });
