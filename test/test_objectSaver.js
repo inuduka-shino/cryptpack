@@ -22,10 +22,11 @@ describe('obecjtSaver TEST', () => {
         if (dummySaverData === null) {
           return null;
         }
-        return JSON.parse(dummySaverData);
+        return Promise.resolve(JSON.parse(dummySaverData));
       }
     function dummySave(obj) {
         dummySaverData = JSON.stringify(obj);
+        return Promise.resolve();
       }
     const cntxt = {
             'a': 'AAA',
