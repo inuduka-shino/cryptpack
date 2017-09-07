@@ -7,7 +7,9 @@ function define(func) {
 }
 
 define((require) => {
-  const jsonFile = require('./jsonFile'),
+  const path = require('path'),
+        fs = require('fs'),
+        jsonFile = require('./jsonFile'),
         objectSaver = require('./objectSaver');
 
   function generateContentsID(cntxt) {
@@ -28,20 +30,30 @@ define((require) => {
   }
 
   async function regist(cntxt, clientId, srcPath) {
-    const contentsId = generateContentsID(cntxt);
+    const destFolderPath = cntxt.destFileFolderPath;
 
-    /* eslint-disable no-console */
-    console.log(`clientId=${clientId}`);
-    console.log(`srcPath=${srcPath}`);
-    console.log(`contentsId=${contentsId}`);
-    /* eslint-enable no-console */
+    const contentsId = generateContentsID(cntxt),
+          destStream = fs.createWriteStream(
+            path.join(destFolderPath, contentsId),
+            {flags:'wx'}
+          ),
+          srcStream = fs.createReadStream(srcPath);
 
     if (typeof cntxt.contentsInfo[contentsId] !== 'undefined') {
       throw new Error(`alrady contentsId exist. (${contentsId})`);
     }
 
-    // ----
-    // ----
+    const contentsWrited = (()=>{
+      return new Promise((resolve)=>{
+        destStream.on('close', () => {
+            resolve();
+        });
+      });
+    })();
+
+    // TODO: translate for encript
+    srcStream.pipe(destStream);
+
     cntxt.contentsInfo[contentsId] = {
       clientId,
       sourcePath: srcPath,
@@ -52,9 +64,9 @@ define((require) => {
     }
 
     cntxt.clientContentMap[clientId].push(contentsId);
+    const configWrited = cntxt.saver.flush();
 
-    // save to jsonFile
-    await cntxt.saver.flush();
+    await Promise.all([contentsWrited, configWrited]);
 
     return contentsId;
   }

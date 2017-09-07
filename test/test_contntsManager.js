@@ -55,7 +55,7 @@ describe('contents manager TEST', () => {
     expect(contentsMng).has.a.property('regist');
   });
 
-  describe('use file test', () =>{
+  describe('savefile test', () =>{
     beforeEach(async ()=>{
       await fsUnlink(testfilepath).catch((err)=>{
         if (err.code !== 'ENOENT') {
@@ -71,7 +71,8 @@ describe('contents manager TEST', () => {
 
     it('regist',async ()=>{
       const contentsMng = await defaultGen();
-      const cntntId = await contentsMng.regist('CI9999','sp/aaa/bbb');
+      const srcPath = `${workFolderPath}/src/testSrc.txt`;
+      const cntntId = await contentsMng.regist('CI9999',srcPath);
 
       expect(cntntId).is.equal(`${contentsIdBase}00001`);
 
@@ -81,4 +82,14 @@ describe('contents manager TEST', () => {
     });
 
   });
+  describe.skip('reg contents test', () =>{
+    it('reg contents',async ()=>{
+      const srcPath = `${workFolderPath}/src/testSrc.txt`;
+      const contentsMng = await defaultGen();
+
+      const cntId = await contentsMng.regist('CI001', srcPath);
+      expect(cntId).is.equal(`${contentsIdBase}00002`);
+    });
+  });
+
 });
