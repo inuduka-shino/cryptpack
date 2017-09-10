@@ -70,5 +70,5 @@ module.exports = (()=>{
     };
   }
 
-  return {generate};
+  return generate;
 })();

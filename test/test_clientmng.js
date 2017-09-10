@@ -13,11 +13,11 @@ const unlink = util.promisify(fs.unlink),
 describe('clientManger',()=>{
 
   it('load module',() => {
-    expect(clientManager).is.a('Object');
+    expect(clientManager).is.a('Function');
   });
 
   it('generate', () => {
-    const cmi = clientManager.generate(
+    const cmi = clientManager(
           path.join(__dirname, 'work/test2.json')
         );
 
@@ -31,7 +31,7 @@ describe('clientManger',()=>{
 
     await unlink(testfilepath).catch(noop);
 
-    const cmi = clientManager.generate(testfilepath);
+    const cmi = clientManager(testfilepath);
     const clientId = await cmi.registClient({
       clientName: 'testname',
       publicKeyString: '<pub Keyy>'
@@ -49,7 +49,7 @@ describe('clientManger',()=>{
 
     await unlink(testfilepath).catch(noop);
     await (async () => {
-      const cmi = clientManager.generate(testfilepath);
+      const cmi = clientManager(testfilepath);
 
       const clientIdx = await cmi.registClient({
         clientName: 'testname',
@@ -64,7 +64,7 @@ describe('clientManger',()=>{
       expect(clientIdx).is.not.equal(clilentID);
     })();
 
-    const cmi2 = clientManager.generate(testfilepath);
+    const cmi2 = clientManager(testfilepath);
     const clnt = await cmi2.getClient(clilentID);
 
     expect(clnt.publicKeyString()).is.equal(testString);
