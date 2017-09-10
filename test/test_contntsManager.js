@@ -8,8 +8,7 @@ const contentsManager = require('../modules/contentsManager'),
       jsonFile = require('../modules/jsonFile');
 
 const fsUnlink = util.promisify(fs.unlink),
-      fsMkdir = util.promisify(fs.mkdir),
-      noop= ()=>{}; //eslint-disable-line no-empty-function, func-style
+      fsMkdir = util.promisify(fs.mkdir);
 
 function mkdirForce(dirpath) {
   return fsMkdir(dirpath).catch((err)=>{
@@ -81,15 +80,6 @@ describe('contents manager TEST', () => {
       expect(saveData.counter).is.equal(1);
     });
 
-  });
-  describe.skip('reg contents test', () =>{
-    it('reg contents',async ()=>{
-      const srcPath = `${workFolderPath}/src/testSrc.txt`;
-      const contentsMng = await defaultGen();
-
-      const cntId = await contentsMng.regist('CI001', srcPath);
-      expect(cntId).is.equal(`${contentsIdBase}00002`);
-    });
   });
 
 });
