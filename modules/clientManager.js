@@ -2,11 +2,15 @@
 /*eslint-env node */
 /*eslint-disable no-console: "warn" */
 
-const jsonFile = require('./jsonFile');
+function define(func) {
+  module.exports = func(require);
+}
 
-const clientIdBase = 'ASS002';
+define((require) => {
+  const jsonFile = require('./jsonFile');
 
-module.exports = (()=>{
+  const clientIdBase = 'ASS002';
+
 
   function genClientData(clientId, clientInfo) {
     return {
@@ -71,4 +75,4 @@ module.exports = (()=>{
   }
 
   return generate;
-})();
+});
