@@ -5,10 +5,12 @@ const contentsManager = require('../modules/contentsManager'),
       expect = require('chai').expect,
       util = require('util'),
       fs = require('fs'),
+      path = require('path'),
       jsonFile = require('../modules/jsonFile');
 
 const fsUnlink = util.promisify(fs.unlink),
-      fsMkdir = util.promisify(fs.mkdir);
+      fsMkdir = util.promisify(fs.mkdir),
+      fsReaddir = util.promisify(fs.readdir);
 
 function mkdirForce(dirpath) {
   return fsMkdir(dirpath).catch((err)=>{
@@ -56,11 +58,21 @@ describe('contents manager TEST', () => {
 
   describe('savefile test', () =>{
     beforeEach(async ()=>{
-      await fsUnlink(testfilepath).catch((err)=>{
-        if (err.code !== 'ENOENT') {
-          throw err;
-        }
-      });
+      await Promise.all([
+        fsUnlink(testfilepath).catch((err)=>{
+          if (err.code !== 'ENOENT') {
+            throw err;
+          }
+        }),
+        fsReaddir(destFileFolderPath).then((fileList)=>{
+          return Promise.all(fileList.map((file) => {
+              if (file === '.' || file === '..') {
+                return true;
+              }
+              return fsUnlink(path.join(destFileFolderPath,file));
+          }));
+        }),
+      ]);
     });
 
     it('init',async ()=>{
