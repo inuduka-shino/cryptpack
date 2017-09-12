@@ -20,14 +20,16 @@ function define(func) {
 }
 
 define(()=>{
+  function loaded(cntxt) {
+    return cntxt.saveImage!==null;
+  }
 
   //eslint-disable-next-line max-params
   return ({objInfo, saver, propList, initSaveData})=>{
-    let saveImage = null;
+    let cntxt = {
+      saveImage: null
+    };
 
-    function loaded() {
-      return saveImage!==null;
-    }
 
     const propUtil = ((propNameList)=>{
       const propStruct = propNameList.map((propName)=>{
@@ -110,7 +112,7 @@ define(()=>{
     }
 
     return {
-      loaded,
+      loaded: loaded.bind(null, cntxt),
       init,
       flush,
     };
