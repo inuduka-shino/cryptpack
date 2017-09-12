@@ -4,8 +4,11 @@
 // Object info to saved
 // ObjectSaver(paramObj)
 // paramObj: {
-// cntxt, saver, propMap, initSaveData
+// objInfo, saver, propMap, initSaveData
 // }
+// objInfoのメンバとsaveImageのメンバをpropMapで紐づけ
+// saveImageをJsonFileでsave,loadする後、前で
+// 紐づけに従い値を同期（一方をもう一方へ代入）する。
 // return val
 // {
 //   init()
@@ -17,9 +20,14 @@ function define(func) {
 }
 
 define(()=>{
+
   //eslint-disable-next-line max-params
-  return ({cntxt, saver, propList, initSaveData})=>{
+  return ({objInfo, saver, propList, initSaveData})=>{
     let saveImage = null;
+
+    function loaded() {
+      return saveImage!==null;
+    }
 
     const propUtil = ((propNameList)=>{
       const propStruct = propNameList.map((propName)=>{
@@ -84,7 +92,7 @@ define(()=>{
         const val = member.getVal(saveImage);
 
         if (typeof val !== 'undefined') {
-          member.setVal(cntxt, val);
+          member.setVal(objInfo, val);
         }
       });
     }
@@ -94,7 +102,7 @@ define(()=>{
         throw new Error('not init, yet');
       }
       propUtil.forEach((member)=>{
-        const val = member.getVal(cntxt);
+        const val = member.getVal(objInfo);
 
         member.setVal(saveImage, val);
       });
@@ -102,6 +110,7 @@ define(()=>{
     }
 
     return {
+      loaded,
       init,
       flush,
     };

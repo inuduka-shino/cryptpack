@@ -51,7 +51,7 @@ define((require) => {
       });
     })();
 
-    // TODO: translate for encript
+    //  translate for encript
     srcStream.pipe(destStream);
 
     cntxt.contentsInfo[contentsId] = {
@@ -88,7 +88,7 @@ define((require) => {
         };
 
     cntxt.saver = objectSaver({
-        cntxt,
+        objInfo:cntxt,
         saver: jsonFile(info.jsonFilePath),
         propList:  [
           'counter',
