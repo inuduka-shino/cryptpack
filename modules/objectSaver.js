@@ -80,8 +80,11 @@ define(()=>{
     return cntxt.saveImage!==null;
   }
 
-  async function init(cntxt) {
+  async function init(cntxt, allowReInitFlag) {
     if (cntxt.saveImage!==null) {
+      if (allowReInitFlag) {
+        return;
+      }
       throw new Error('already init');
     }
     const loadData = await cntxt.saver.load();
@@ -117,8 +120,13 @@ define(()=>{
   }
 
   //eslint-disable-next-line max-params
-  return ({objInfo, saver, propList, initSaveData})=>{
-    const cntxt = {
+  return ({
+      objInfo,
+      saver,
+      propList,
+      initSaveData
+    })=>{
+      const cntxt = {
       objInfo,
       saver,
       initSaveData,
@@ -128,8 +136,8 @@ define(()=>{
     };
 
     return {
-      loaded: loaded.bind(null, cntxt),
-      init: init.bind(null,cntxt),
+      initOrDoNothing: loaded.bind(null, cntxt, true),
+      init: init.bind(null,cntxt, false),
       flush: flush.bind(null, cntxt),
     };
   };

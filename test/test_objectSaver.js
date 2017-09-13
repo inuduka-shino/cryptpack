@@ -61,13 +61,17 @@ describe('obecjtSaver TEST', () => {
       expect(objInfo.a1).is.equal('xxx');
     });
     it('check init',async () => {
-      expect(objSaver.loaded()).to.be.false; //eslint-disable-line no-unused-expressions
       await objSaver.init();
-      expect(objSaver.loaded()).to.be.true; //eslint-disable-line no-unused-expressions
+      expect(objInfo.a).is.equal('initA');
+      expect(objInfo.b).is.equal('initB');
+      await objSaver.initOrDoNothing();
       expect(objInfo.a).is.equal('initA');
       expect(objInfo.b).is.equal('initB');
     });
     it('check save',async () => {
+      await objSaver.initOrDoNothing();
+      expect(objInfo.a).is.equal('initA');
+      expect(objInfo.b).is.equal('initB');
       objInfo.a = 'NEW A';
       await objSaver.flush();
       expect(JSON.parse(dummySaverData).a).is.equal('NEW A');
