@@ -20,101 +20,117 @@ function define(func) {
 }
 
 define(()=>{
-  function loaded(cntxt) {
-    return cntxt.saveImage!==null;
-  }
 
-  //eslint-disable-next-line max-params
-  return ({objInfo, saver, propList, initSaveData})=>{
-    let cntxt = {
-      saveImage: null
-    };
+  const genPropUtil = (()=>{
+    function getVal(propNameList, rootObj) {
+      // propNameListは 'a.b.c'に対応した['a','b','c']
+      // {a:{b:{c:val}}} の valが取得できる
+      return propNameList.reduce((obj, propName)=>{
+        return obj[propName];
+      }, rootObj);
+    }
 
+    //eslint-disable-next-line max-params
+    function setVal(propNameList, lastIndex, rootObj, val) {
+      // propNameListは 'a.b.c'に対応した['a','b','c']
+      // lastIndexはこのarrayの最後の要素のindex
+      // {a:{b:{c:old_val}}} のold_valに valに変更できる
+      propNameList.reduce((obj, propName, index)=>{
+        if (index === lastIndex) {
+          obj[propName] = val;
 
-    const propUtil = ((propNameList)=>{
+          return null;
+        }
+
+        return obj[propName];
+      }, rootObj);
+    }
+
+    function genMemberObj([propNameList, lastIndex]) {
+      return {
+        getVal: getVal.bind(null, propNameList),
+        setVal: setVal.bind(null, propNameList, lastIndex),
+      };
+    }
+
+    function forEach(propStruct, func) {
+      propStruct.forEach((propNameStruct)=>{
+        return func(genMemberObj(propNameStruct));
+      });
+    }
+
+    function genPropUtil(propNameList) {
       const propStruct = propNameList.map((propName)=>{
         const propNameStruct = propName.split('.');
 
         return [propNameStruct, propNameStruct.length - 1];
       });
 
-      function getVal(propNameList, rootObj) {
-        return propNameList.reduce((obj, propName)=>{
-          return obj[propName];
-        }, rootObj);
-      }
-      //eslint-disable-next-line max-params
-      function setVal(propNameList, lastIndex, rootObj, val) {
-        propNameList.reduce((obj, propName, index)=>{
-          if (index === lastIndex) {
-            obj[propName] = val;
-
-            return null;
-          }
-
-          return obj[propName];
-        }, rootObj);
-
-      }
-
-      function genMemberObj([propNameList, lastIndex]) {
-        return {
-          getVal: getVal.bind(null, propNameList),
-          setVal: setVal.bind(null, propNameList, lastIndex),
-        };
-      }
-      function forEach(func) {
-        propStruct.forEach((propNameStruct)=>{
-          return func(genMemberObj(propNameStruct));
-        });
-      }
 
       return {
         //
-        forEach,
+        forEach: forEach.bind(null, propStruct),
       };
-    })(propList);
+    }
 
-    async function init() {
-      if (saveImage!==null) {
-        throw new Error('already init');
-      }
-      const loadData = await saver.load();
+    return genPropUtil;
+  })();
 
-      if (loadData === null) {
-        if (typeof initSaveData === 'undefined') {
-          saveImage = {};
-        } else {
-          saveImage = initSaveData;
-        }
+  function loaded(cntxt) {
+    return cntxt.saveImage!==null;
+  }
+
+  async function init(cntxt) {
+    if (cntxt.saveImage!==null) {
+      throw new Error('already init');
+    }
+    const loadData = await cntxt.saver.load();
+
+    if (loadData === null) {
+      if (typeof cntxt.initSaveData === 'undefined') {
+        cntxt.saveImage = {};
       } else {
-        saveImage = loadData;
+        cntxt.saveImage = cntxt.initSaveData;
       }
-      propUtil.forEach((member)=>{
-        const val = member.getVal(saveImage);
-
-        if (typeof val !== 'undefined') {
-          member.setVal(objInfo, val);
-        }
-      });
+    } else {
+      cntxt.saveImage = loadData;
     }
+    cntxt.propList.forEach((member)=>{
+      const val = member.getVal(cntxt.saveImage);
 
-    async function flush() {
-      if (saveImage === null) {
-        throw new Error('not init, yet');
+      if (typeof val !== 'undefined') {
+        member.setVal(cntxt.objInfo, val);
       }
-      propUtil.forEach((member)=>{
-        const val = member.getVal(objInfo);
+    });
+  }
 
-        member.setVal(saveImage, val);
-      });
-      await saver.save(saveImage);
+  async function flush(cntxt) {
+    if (cntxt.saveImage === null) {
+      throw new Error('not init, yet');
     }
+    cntxt.propList.forEach((member)=>{
+      const val = member.getVal(cntxt.objInfo);
+
+      member.setVal(cntxt.saveImage, val);
+    });
+    await cntxt.saver.save(cntxt.saveImage);
+  }
+
+  //eslint-disable-next-line max-params
+  return ({objInfo, saver, propList, initSaveData})=>{
+    const cntxt = {
+      objInfo,
+      saver,
+      initSaveData,
+      //
+      propList: genPropUtil(propList),
+      saveImage: null,
+    };
 
     return {
       loaded: loaded.bind(null, cntxt),
-      init,
-      flush,
+      init: init.bind(null,cntxt),
+      flush: flush.bind(null, cntxt),
     };
   };
 });
