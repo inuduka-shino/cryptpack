@@ -18,7 +18,7 @@ describe('clientManger',()=>{
 
   it('generate', () => {
     const cmi = clientManager(
-          path.join(__dirname, 'work/test2.json')
+          path.join(__dirname, 'work/dummy.json')
         );
 
     expect(cmi).is.a('Object');
@@ -37,12 +37,23 @@ describe('clientManger',()=>{
       publicKeyString: '<pub Keyy>'
     });
 
-    //console.log(clientId);
     expect(clientId).is.a('string');
+    expect(clientId).is.equal('ASS002CA00001');
+    // json file check!
+
+
+    const cmi2 = clientManager(testfilepath);
+    const clientId2 = await cmi2.registClient({
+      clientName: 'testname',
+      publicKeyString: '<pub Keyy>'
+    });
+
+    expect(clientId2).is.a('string');
+    expect(clientId2).is.equal('ASS002CA00002');
   });
 
   it('getClient', async () => {
-    const testfilepath = path.join(__dirname, 'work/test3.json'),
+    const testfilepath = path.join(__dirname, 'work/test4.json'),
           testString = 'pubkey string abc';
 
     let clilentID=null;
