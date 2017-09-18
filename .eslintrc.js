@@ -192,7 +192,9 @@ module.exports = {
         "no-warning-comments": "warn",
         "no-whitespace-before-property": "error",
         "no-with": "error",
-        "object-curly-newline": ["warn", {"minProperties": 2}],
+        "object-curly-newline": ["warn", {
+          "minProperties": 1
+        }],
         "object-curly-spacing": "error",
         "object-property-newline": "error",
         "object-shorthand": "warn",
