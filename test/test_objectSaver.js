@@ -11,6 +11,7 @@ describe('obecjtSaver TEST', () => {
   });
   it('gen instance',() => {
     const saver = objectSaver({
+      //
       propList: []
     });
     expect(saver).has.a.property('init');
@@ -64,6 +65,11 @@ describe('obecjtSaver TEST', () => {
       await objSaver.init();
       expect(objInfo.a).is.equal('initA');
       expect(objInfo.b).is.equal('initB');
+      await objSaver.initOrDoNothing();
+      expect(objInfo.a).is.equal('initA');
+      expect(objInfo.b).is.equal('initB');
+    });
+    it('check initOrDoNothing',async () => {
       await objSaver.initOrDoNothing();
       expect(objInfo.a).is.equal('initA');
       expect(objInfo.b).is.equal('initB');

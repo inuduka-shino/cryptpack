@@ -35,6 +35,7 @@ define(()=>{
       // propNameListは 'a.b.c'に対応した['a','b','c']
       // lastIndexはこのarrayの最後の要素のindex
       // {a:{b:{c:old_val}}} のold_valに valに変更できる
+
       propNameList.reduce((obj, propName, index)=>{
         if (index === lastIndex) {
           obj[propName] = val;
@@ -75,10 +76,6 @@ define(()=>{
 
     return genPropUtil;
   })();
-
-  function loaded(cntxt) {
-    return cntxt.saveImage!==null;
-  }
 
   async function init(cntxt, allowReInitFlag) {
     if (cntxt.saveImage!==null) {
@@ -127,18 +124,23 @@ define(()=>{
       initSaveData
     })=>{
       const cntxt = {
-      objInfo,
-      saver,
-      initSaveData,
-      //
-      propList: genPropUtil(propList),
-      saveImage: null,
-    };
+        objInfo,
+        saver,
+        initSaveData,
+        //
+        propList: genPropUtil(propList),
+        saveImage: null,
+      };
+      ['objInfo','saver','initSaveData'].forEach((propName)=>{
+        if (typeof cntxt[propName] === 'undefined') {
+          throw new Error(`bad parm Object:[${propName}] is undefined.`);
+        }
+      });
 
-    return {
-      initOrDoNothing: loaded.bind(null, cntxt, true),
-      init: init.bind(null,cntxt, false),
-      flush: flush.bind(null, cntxt),
+      return {
+        initOrDoNothing: init.bind(null, cntxt, true),
+        init: init.bind(null,cntxt, false),
+        flush: flush.bind(null, cntxt),
+      };
     };
-  };
 });

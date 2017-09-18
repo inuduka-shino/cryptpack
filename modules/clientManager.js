@@ -16,46 +16,40 @@ define((require) => {
     if (counter > 99999) {
       throw new Error(`overflow client map count over ${counter}`);
     }
-    const counterStr = ('00000' + counter).slice(-5);
+    cntxt.counter = counter;
 
-    return [counter, cntxt.clientIdBase + 'CA' + counterStr];
+    return cntxt.clientIdBase + 'CA' + ('00000' + counter).slice(-5);
   }
 
-  async function registClient(clientInfo) {
-    if (clientMap === null) {
-      clientMap = await cmFile.load();
-      if (clientMap === null) {
-        clientMap = {
-          title: 'client map',
-          counter: 0,
-        };
-      }
-    }
-    const [counter, clientId] = genClientId(clientMap);
+  function genClientData(clientId, clientInfo) {
+    return {
+      clientId,
+      clientName: clientInfo.clientName,
+      publicKeyString: clientInfo.publicKeyString,
+    };
+  }
 
-    clientMap.counter = counter;
-    clientMap[clientId] = genClientData(clientId, clientInfo);
+  async function registClient(cntxt, clientInfo) {
+    await cntxt.saver.initOrDoNothing();
 
-    function genClientData(clientId, clientInfo) {
-      return {
-        clientId,
-        clientName: clientInfo.clientName,
-        publicKeyString: clientInfo.publicKeyString,
-      };
-    }
-    await cmFile.save(clientMap);
+    const clientId = genClientId(cntxt);
+    cntxt.clientInfo[clientId] = genClientData(clientId, clientInfo);
+
+    await cntxt.saver.flush();
 
     return clientId;
   }
 
-  async function getClient(clientId) {
-    if (clientMap === null) {
-      clientMap = await cmFile.load();
-    }
+  async function getClient(cntxt, clientId) {
+    await cntxt.saver.initOrDoNothing();
+    const _=null;
+
     return {
+      //
       publicKeyString () {
-        return clientMap[clientId].publicKeyString;
-      }
+        return cntxt.clientInfo[clientId].publicKeyString;
+      },
+      _,
     };
   }
 
@@ -70,7 +64,7 @@ define((require) => {
         };
 
     cntxt.saver = objectSaver({
-        cntxt,
+        objInfo: cntxt,
         saver: jsonFile(clientMapFilePath),
         propList:  [
           'counter',
@@ -86,8 +80,8 @@ define((require) => {
       });
 
     return {
-      registClient,
-      getClient,
+      registClient: registClient.bind(null, cntxt),
+      getClient: getClient.bind(null, cntxt),
     };
   }
 
