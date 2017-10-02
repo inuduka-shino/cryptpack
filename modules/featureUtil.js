@@ -32,5 +32,34 @@ define(() => {
     return new Proxy(targetObj, proxyHandler(propMap));
   }
 
-  return {genProxy};
+  // new version
+  function contextProxyObject(allowProps, refObj, transProps) {
+    // allowProps: 読み書き可能（独自オブジェクト）
+    // transProps: refObjとマップ
+    const selfObj = {};
+    return new Proxy(selfObj, {
+      get (selfObj, name) {
+        if (allowProps.include(name)) {
+          return selfObj[name];
+        }
+        if (transProps.includes(name)) {
+          return refObj[name];
+        }
+        throw new Error(`can not read property name(${name})`);
+      },
+      set (selfObj, name, val) {
+        if (allowProps.include(name)) {
+          selfObj[name] = val;
+        }
+        if (transProps.includes(name)) {
+          refObj[name] = val;
+        }
+        throw new Error(`can not write property name(${name})`);
+      }
+    });
+  }
+  return {
+    genProxy,
+    contextProxyObject,
+  };
 });
