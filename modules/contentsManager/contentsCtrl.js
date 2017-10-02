@@ -1,5 +1,5 @@
 /* contentsManager.js */
-/*eslint-env node,  */
+/*eslint-env node,  *
 /*global  */
 
 function define(func) {
@@ -9,8 +9,9 @@ function define(func) {
 define((require) => {
   const path = require('path'),
         fs = require('fs'),
-        jsonFile = require('./jsonFile'),
-        objectSaver = require('./objectSaver');
+        stream = require('stream'),
+        jsonFile = require('../jsonFile'),
+        objectSaver = require('../objectSaver');
 
   function generateContentsID(cntxt) {
     // cntxt.counter
@@ -29,15 +30,44 @@ define((require) => {
     await cntxt.saver.init();
   }
 
-  async function regist(cntxt, clientId, srcPath) {
+  function stage(cntxt, srcInfo0,) {
+
+    const srcInfo = (()=>{
+      if (!Array.isArray(srcInfo0)) {
+        return ['file', srcInfo];
+      }
+      return srcInfo0;
+    })();
+
     const destFolderPath = cntxt.destFileFolderPath;
 
     const contentsId = generateContentsID(cntxt),
           destStream = fs.createWriteStream(
             path.join(destFolderPath, contentsId),
-            {flags:'wx'}
-          ),
-          srcStream = fs.createReadStream(srcPath);
+            {
+              flags:'wx'
+            }
+          );
+
+
+     const [srcStream, title] = (() => {
+       if (srcInfo[0] === 'file') {
+         let title = null;
+         if (typeof srcInfo[2] === 'undefined') {
+           title = path.basename(srcInfo[1]);
+         }
+         return [fs.createReadStream(srcInfo[1]), title];
+       }
+       if (srcInfo[0] === 'stream') {
+         return [srcInfo[1], srcInfo[2]];
+       }
+       //srcInfo[0] === 'text'
+       const strm = new stream.Readable();
+       strm.push(srcInfo[1]);
+       strm.push(null);
+
+       return [strm, srcInfo[2]];
+     })();
 
     if (typeof cntxt.contentsInfo[contentsId] !== 'undefined') {
       throw new Error(`alrady contentsId exist. (${contentsId})`);
@@ -55,22 +85,52 @@ define((require) => {
     srcStream.pipe(destStream);
 
     cntxt.contentsInfo[contentsId] = {
-      clientId,
+      title,
       sourcePath: srcPath,
       //   destPath: '....',
     };
+
+    return [ contentsId, contentsWrited];
+  }
+
+  function regist(clntCntxt) {
+    // TODO:
+    // indexContentsを作成する。
+    // cntxt.clientContentMap: {},
+    // {
+    //   clientId: {
+    //       indexContents: indexContentsID
+    //       contentsList: [contentsID, ....]
+    //   }
+
+
     if (typeof cntxt.clientContentMap[clientId] === 'undefined') {
       cntxt.clientContentMap[clientId] = [];
     }
-
     cntxt.clientContentMap[clientId].push(contentsId);
+
+    // const indexContents =  cntxt.clientContentMap[]
+
     const configWrited = cntxt.saver.flush();
-
-    await Promise.all([contentsWrited, configWrited]);
-
-    return contentsId;
   }
 
+
+  function getIndexContentsID(clntCntxt) {
+    return clntCntxt.contentsInfo.indexContents;
+  }
+
+  function getClient(cntxt, clientID) {
+    const clntCntxt = {
+        clientID,
+        contentsInfo: cntxt.clientContentMap[clientID],
+      };
+
+    return {
+      getIndexContentsID: getIndexContentsID.bind(null, clntCntxt),
+      addContents: addContents.bind(null, clntCntxt),
+      regist: regist.bind(null, clntCntxt),
+    };
+  }
   function generate(info) {
     // input: info = {
     //   contentsIdBase,
@@ -103,14 +163,19 @@ define((require) => {
           contentsInfo: {},
           // {contentsID: {
           //   clientId: '....',
+          //   catgory: '....',
+          //   title: '....',
           //   sourcePath: '....',
           //   destPath: '....',
           // }, ...}
           clientContentMap: {},
-          // {clientId: [contentsID, ....]',...}
+          // {
+          //   clientId: {
+          //       indexContents: indexContentsID
+          //       contentsList: [contentsID, ....]
+          //   }
         },
       });
-
 
     return {
       dev: {
@@ -119,7 +184,11 @@ define((require) => {
       },
 
       init:  init.bind(null, cntxt),
-      regist: regist.bind(null, cntxt),
+      stage: stage.bind(null, cntxt),
+      getClient: getClient.bind(null, cntxt),
+      // by client
+      //  regist: regist.bind(null, cntxt),
+      //  getIndexContentsID: getIndexContentsID.bind(null, cntxt),
       // getContentsInfo,
     };
   }

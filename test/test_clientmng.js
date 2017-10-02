@@ -1,4 +1,4 @@
-/*eslint-env node, mocha */
+/*eslint-env node, mocha,  */
 /*eslint-disable no-console:"warn" */
 
 const path = require('path'),
@@ -6,7 +6,6 @@ const path = require('path'),
       fs = require('fs'),
       util = require('util'),
       clientManager = require('../modules/clientManager');
-
 const unlink = util.promisify(fs.unlink),
       noop= ()=>{}; //eslint-disable-line no-empty-function, func-style
 
