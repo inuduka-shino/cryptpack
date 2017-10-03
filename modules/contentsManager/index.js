@@ -73,7 +73,8 @@ define((require) => {
       client: manager.client.bind(null, cntxt),
       // by client control
       //  add(docInfo) return contentsId
-      //  regist(): regist.bind(null, cntxt),
+      //  deleteContents(ContentsID),
+      //  regist()  indexcontents生成 & json save
     };
   };
 
