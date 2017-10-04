@@ -9,9 +9,11 @@ define((require) => {
   const path = require('path'),
         fs = require('fs'),
         stream = require('stream'),
+        util = require('util'),
 
         generateContentsID = require('./generateContentsID');
         //contentsCtrl = require('./contentsCtrl');
+  const fsUnlink =util.promisify(fs.unlink);
 
   const docInfoSymbol = Symbol('docInfo context');
   const genDocInfo = require('./docInfo').bind(null, docInfoSymbol);
@@ -31,10 +33,10 @@ define((require) => {
     const clientID = ccntxt.clientID;
 
     const destFolderPath = cntxt.destFileFolderPath,
-          contentsId = generateContentsID(cntxt);
+          contentsID = generateContentsID(cntxt);
 
     const destStream = fs.createWriteStream(
-            path.join(destFolderPath, contentsId),
+            path.join(destFolderPath, contentsID),
             {
               flags:'wx'
             }
@@ -54,23 +56,60 @@ define((require) => {
     cntxt.wroteContents.push(contentsWrote);
 
     // set contents Information
-    if (typeof cntxt.contentsInfo[contentsId] !== 'undefined') {
-      throw new Error(`alrady contentsId exist. (${contentsId})`);
+    if (typeof cntxt.contentsInfo[contentsID] !== 'undefined') {
+      throw new Error(`alrady contentsId exist. (${contentsID})`);
     }
-    cntxt.contentsInfo[contentsId] = {
+
+    const contentsList = cntxt.clientContentMap[clientID].contentsList;
+
+    contentsList.push(contentsID);
+    cntxt.contentsInfo[contentsID] = {
       title: docInfoCntxt.title,
       sourcePath: docInfoCntxt.srcPath,
     };
-    cntxt.clientContentMap[clientID].contentsList.push(contentsId);
 
-    return contentsId;
+    return contentsID;
   }
 
-  function deleteContents(ccntxt, contentsId) {
-    // TODO:
-    console.log(`${contentsId}`);
-    //cntxt.clientContentMap[clientID].contentsList.UNpush(contentsId);
-    // 削除promiseもcontentsListに入れる。
+  function deleteContentsImpl(param) {
+    // param mamber is
+    // contentsInfo, contentsList, index, contentsID, wroteContents, destFileFolderPath
+    param.contentsList.splice(param.index,1);
+    Reflect.deleteProperty(param.contentsInfo, param.contentsID);
+    const destPath = path.join(param.destFileFolderPath, param.contents.ID);
+
+    param.wroteContents.push(fsUnlink(destPath));
+  }
+
+  function deleteContentsByIndex(ccntxt, index) {
+    const cntxt = ccntxt.managerCntxt,
+          clientID = ccntxt.clientID,
+          contentsList = cntxt.clientContentMap[clientID].contentsList;
+
+    deleteContentsImpl({
+      contentsInfo: cntxt.contentsInfo,
+      contentsList,
+      index,
+      contentsID: contentsList[index],
+      wroteContents: cntxt.wroteContents,
+      destFileFolderPath: cntxt.destFileFolderPath
+    });
+  }
+  function deleteContentsByContentsID(ccntxt, contentsID) {
+    const cntxt = ccntxt.managerCntxt,
+          clientID = ccntxt.clientID,
+          contentsList = cntxt.clientContentMap[clientID].contentsList;
+
+    const index = contentsList.indexOf(contentsID);
+
+    deleteContentsImpl({
+      contentsInfo: cntxt.contentsInfo,
+      contentsList,
+      index,
+      contentsID,
+      wroteContents: cntxt.wroteContents,
+      destFileFolderPath: cntxt.destFileFolderPath
+    });
   }
 
   function regist(ccntxt) {
@@ -79,12 +118,12 @@ define((require) => {
     const managerCntxt = ccntxt.managerCntxt,
           cientContentInfo = managerCntxt.clientContentMap[ccntxt.clientID];
 
-    deleteContents(ccntxt, cientContentInfo.indexContents);
+    deleteContentsByIndex(ccntxt, cientContentInfo.indexContentsIndex);
 
     // TODO: indexcontents イメージ
     const idexContensInfo = genDocInfo(cientContentInfo.contentsList);
-    const indexContentsID = add(ccntxt, idexContensInfo);
-    cientContentInfo.indexContents = indexContentsID;
+    const [, index] = add(ccntxt, idexContensInfo);
+    cientContentInfo.indexContentsIndex = index;
 
     const wroteSaver = managerCntxt.saver.flush();
 
@@ -103,7 +142,7 @@ define((require) => {
     return {
         add: add.bind(null, ccntxt),
         regist: regist.bind(null, ccntxt),
-        deleteContents: deleteContents.bind(null, ccntxt),
+        deleteContents: deleteContentsByContentsID.bind(null, ccntxt),
     };
   }
 

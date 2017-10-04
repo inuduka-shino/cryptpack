@@ -58,8 +58,8 @@ define((require) => {
           clientContentMap: {},
           // {
           //   clientId: {
-          //       indexContents: indexContentsID
           //       contentsList: [contentsID, ....]
+          //       indexContentsIndex: index of contentsList for indexContentsID
           //   }
         },
       });
