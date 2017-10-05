@@ -14,6 +14,8 @@ const fsUnlink = util.promisify(fs.unlink),
       fsMkdir = util.promisify(fs.mkdir),
       fsReaddir = util.promisify(fs.readdir);
 
+const debug = Symbol.for('debug');
+
 function mkdirForce(dirpath) {
   return fsMkdir(dirpath).catch((err)=>{
     if (err.code !== 'EEXIST') {
@@ -54,7 +56,7 @@ describe('contents manager TODO', () => {
       jsonFilePath: testfilepath,
       destFileFolderPath,
     });
-    expect(contentsMng).has.property('dev');
+    expect(contentsMng).has.property(debug);
   });
   async function gencContentsManager() {
      const cMng = contentsManager({
