@@ -1,4 +1,4 @@
-/* cgenerateContentsID.js */
+/* contentsManager:generateContentsID.js */
 /*eslint-env node,  */
 
 function define(func) {
