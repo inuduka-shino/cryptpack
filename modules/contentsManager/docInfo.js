@@ -10,7 +10,17 @@ define((require) => {
         fs = require('fs'),
         stream = require('stream');
 
-  return function genDocInfoF(accessSymbl, srcInfo0) {
+  function genIndexContents(contentsInfo, contentsList) {
+    return JSON.stringfy({
+      contentsList:  contentsList.map((contentsID)=>{
+        const contentsInfoSaveImage = contentsInfo[contentsID];
+        return [contentsID, contentsInfoSaveImage.title];
+      })
+    });
+  }
+
+  function genDocInfo(accessSymbl, srcInfo0) {
+    // accessSymbol: token for friendship
     // srcInfo = [ type, src, title ]
     // srcはtypeによって決まるなにか
     const srcInfo = (()=>{
@@ -42,9 +52,19 @@ define((require) => {
       throw new Error(`unknown document information type (${srcInfo[0]})`);
     }
 
-    return {
-      [accessSymbl]: cntxt,
-      [Symbol.for('debug')]: cntxt,
+    cntxt.saveImage = {
+      title: cntxt.title,
     };
+
+    return {
+      [Symbol.for('debug')]: cntxt,
+      stream: cntxt.stream,
+      saveImage: cntxt.saveImage,
+    };
+  }
+
+  return {
+    genIndexContents,
+    genDocInfo,
   };
 });

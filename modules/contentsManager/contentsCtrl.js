@@ -32,12 +32,6 @@ define((require) => {
 
   function stage(cntxt, srcInfo0,) {
 
-    const srcInfo = (()=>{
-      if (!Array.isArray(srcInfo0)) {
-        return ['file', srcInfo];
-      }
-      return srcInfo0;
-    })();
 
     const destFolderPath = cntxt.destFileFolderPath;
 
@@ -50,24 +44,6 @@ define((require) => {
           );
 
 
-     const [srcStream, title] = (() => {
-       if (srcInfo[0] === 'file') {
-         let title = null;
-         if (typeof srcInfo[2] === 'undefined') {
-           title = path.basename(srcInfo[1]);
-         }
-         return [fs.createReadStream(srcInfo[1]), title];
-       }
-       if (srcInfo[0] === 'stream') {
-         return [srcInfo[1], srcInfo[2]];
-       }
-       //srcInfo[0] === 'text'
-       const strm = new stream.Readable();
-       strm.push(srcInfo[1]);
-       strm.push(null);
-
-       return [strm, srcInfo[2]];
-     })();
 
     if (typeof cntxt.contentsInfo[contentsId] !== 'undefined') {
       throw new Error(`alrady contentsId exist. (${contentsId})`);

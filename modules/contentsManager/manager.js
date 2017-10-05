@@ -15,20 +15,17 @@ define((require) => {
         //contentsCtrl = require('./contentsCtrl');
   const fsUnlink =util.promisify(fs.unlink);
 
-  const docInfoSymbol = Symbol('docInfo context');
-  const genDocInfo = require('./docInfo').bind(null, docInfoSymbol);
+  const {
+    genDocInfo,
+    genIndexContents,
+  } = require('./docInfo');
 
   async function init(cntxt) {
     await cntxt.saver.init();
   }
 
-  function add(ccntxt, docInfo) {
+  function addImpl(ccntxt, execMode, docInfo) {
     // コンテンツファイル生成開始
-    const docInfoCntxt = docInfo[docInfoSymbol];
-    // docInfoCntxt = {
-    //   stream
-    //   title
-    // }
     const cntxt = ccntxt.managerCntxt;
     const clientID = ccntxt.clientID;
 
@@ -44,7 +41,7 @@ define((require) => {
 
     //  translate for encript
     const encStream = stream.stream.PassThrough;
-    docInfoCntxt.stream.pipe(encStream).pipe(destStream);
+    docInfo.stream.pipe(encStream).pipe(destStream);
 
     const contentsWrote = (()=>{
       return new Promise((resolve)=>{
@@ -60,15 +57,16 @@ define((require) => {
       throw new Error(`alrady contentsId exist. (${contentsID})`);
     }
 
-    const contentsList = cntxt.clientContentMap[clientID].contentsList;
+    const contentsList = cntxt.clientContentMap[clientID].contentsList,
+          newIndex = contentsList.length;
 
     contentsList.push(contentsID);
-    cntxt.contentsInfo[contentsID] = {
-      title: docInfoCntxt.title,
-      sourcePath: docInfoCntxt.srcPath,
-    };
+    cntxt.contentsInfo[contentsID] = docInfo.saveImage;
 
-    return contentsID;
+    if (execMode.retType === 'contentsID') {
+      return contentsID;
+    }
+    return newIndex;
   }
 
   function deleteContentsImpl(param) {
@@ -120,9 +118,14 @@ define((require) => {
 
     deleteContentsByIndex(ccntxt, cientContentInfo.indexContentsIndex);
 
-    // TODO: indexcontents イメージ
-    const idexContensInfo = genDocInfo(cientContentInfo.contentsList);
-    const [, index] = add(ccntxt, idexContensInfo);
+    const idexContensInfo = genDocInfo([
+      'text',
+      genIndexContents(managerCntxt.contentsInfo, cientContentInfo.contentsList),
+      'IndexContents'
+    ]);
+    const index = addImpl(ccntxt, {
+      retType: 'index'
+    }, idexContensInfo);
     cientContentInfo.indexContentsIndex = index;
 
     const wroteSaver = managerCntxt.saver.flush();
@@ -140,7 +143,9 @@ define((require) => {
     };
 
     return {
-        add: add.bind(null, ccntxt),
+        add: addImpl.bind(null, ccntxt, {
+          retType:'contentsID'
+        }),
         regist: regist.bind(null, ccntxt),
         deleteContents: deleteContentsByContentsID.bind(null, ccntxt),
     };
