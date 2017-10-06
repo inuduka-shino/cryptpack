@@ -19,13 +19,13 @@ define((require) => {
     });
   }
 
-  function genDocInfo(accessSymbl, srcInfo0) {
+  function genDocInfo(srcInfo0) {
     // accessSymbol: token for friendship
     // srcInfo = [ type, src, title ]
     // srcはtypeによって決まるなにか
     const srcInfo = (()=>{
         if (!Array.isArray(srcInfo0)) {
-          return ['file', srcInfo];
+          return ['file', srcInfo0];
         }
         return srcInfo0;
       })();
@@ -45,7 +45,8 @@ define((require) => {
       cntxt.stream = srcInfo[1];
     } else if (srcInfo[0] === 'text') {
       const strm = new stream.Readable();
-      strm.push(srcInfo[1]);
+      strm.setEncoding('utf8');
+      strm.push(srcInfo[1], 'utf8');
       strm.push(null);
       cntxt.stream = strm;
     } else {

@@ -75,7 +75,9 @@ describe('contents manager TODO', () => {
     it('genDocInfo', async () =>{
       const contentsMng = await gencContentsManager();
       const docInfo1 = contentsMng.genDocInfo('srcfile path');
-      expect(docInfo1).has.property('dev');
+      expect(docInfo1).has.property(debug);
+      expect(docInfo1[debug].title).is.equal('srcfile path');
+    });
     });
 
     it.skip('skip', async () =>{
