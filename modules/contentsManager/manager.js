@@ -6,6 +6,8 @@ function define(func) {
 }
 
 define((require) => {
+  const debug = Symbol.for('debug');
+
   const path = require('path'),
         fs = require('fs'),
         stream = require('stream'),
@@ -40,7 +42,7 @@ define((require) => {
           );
 
     //  translate for encript
-    const encStream = stream.stream.PassThrough;
+    const encStream = new stream.PassThrough();
     docInfo.stream.pipe(encStream).pipe(destStream);
 
     const contentsWrote = (()=>{
@@ -50,17 +52,24 @@ define((require) => {
         });
       });
     })();
-    cntxt.wroteContents.push(contentsWrote);
+    ccntxt.wroteContents.push(contentsWrote);
+
+    if (typeof cntxt.clientContentMap[clientID] === 'undefined') {
+        cntxt.clientContentMap[clientID] = {
+          contentsList: [],
+          indexContentsIndex: null,
+        };
+    }
+    const contentsList = cntxt.clientContentMap[clientID].contentsList,
+          newIndex = contentsList.length;
+
+    contentsList.push(contentsID);
+
 
     // set contents Information
     if (typeof cntxt.contentsInfo[contentsID] !== 'undefined') {
       throw new Error(`alrady contentsId exist. (${contentsID})`);
     }
-
-    const contentsList = cntxt.clientContentMap[clientID].contentsList,
-          newIndex = contentsList.length;
-
-    contentsList.push(contentsID);
     cntxt.contentsInfo[contentsID] = docInfo.saveImage;
 
     if (execMode.retType === 'contentsID') {
@@ -143,6 +152,7 @@ define((require) => {
     };
 
     return {
+        [debug]: ccntxt,
         add: addImpl.bind(null, ccntxt, {
           retType:'contentsID'
         }),

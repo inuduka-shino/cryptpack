@@ -78,20 +78,23 @@ describe('contents manager TODO', () => {
       expect(docInfo1).has.property(debug);
       expect(docInfo1[debug].title).is.equal('srcfile path');
     });
-    });
-
-    it.skip('skip', async () =>{
-      const clientID='AAAA';
-
+    it('genDocInfo text', async () =>{
       const contentsMng = await gencContentsManager();
-      const counter = contentsMng.client(clientID);
-      const docInfo1 = genDocInfo(srcfile);
-      const docInfo2 = genDocInfo({dummy: 'data'});
-      counter.stage(docInfo1);
-      counter.stage(docInfo2);
-      counter.regist(); // 暗号化＋暗号化ファイル生成　jsonfile 保存
-      counter.getDocList();
-
+      const docInfo = contentsMng.genDocInfo(['text', 'サンプル', 'Sample Title']);
+      expect(docInfo).has.property(debug);
+      expect(docInfo[debug].title).is.equal('Sample Title');
+      expect(docInfo[debug].stream.read()).is.equal('サンプル');
     });
+    it('add DocInfo', async () =>{
+      const contentsMng = await gencContentsManager();
+      const clientID='AAAA';
+      const counter = contentsMng.client(clientID);
+      const docInfo = contentsMng.genDocInfo(['text', 'サンプル', 'Sample Title']);
+      const contentsID = counter.add(docInfo);
+      await Promise.all(counter[debug].wroteContents);
+      expect(contentsID).is.a('string');    
+    });
+
+
   });
 });
