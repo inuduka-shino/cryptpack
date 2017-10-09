@@ -23,6 +23,23 @@ function mkdirForce(dirpath) {
     }
   });
 }
+function mkEmptyDir(dirPath) {
+  return fsMkdir(dirPath).catch((err)=>{
+    if (err.code === 'EEXIST') {
+      return fsReaddir(dirPath).then((flist)=>{
+        return Promise.all(flist.map((filename)=>{
+          return fsUnlink(path.join(dirPath, filename));
+        }));
+      });
+    }
+    throw err;
+  });
+}
+describe('mkEmptyDir test', () => {
+  it('mkEmptyDir test',async ()=>{
+      await mkEmptyDir('test/work/dest');
+  });
+});
 
 describe('contents manager TODO', () => {
   const workFolderPath = 'test/work',
@@ -44,7 +61,7 @@ describe('contents manager TODO', () => {
 
   before(async ()=>{
     await mkdirForce(workFolderPath);
-    await mkdirForce(destFileFolderPath);
+    await mkEmptyDir(destFileFolderPath);
   });
 
   it('require js-moduel',() => {
