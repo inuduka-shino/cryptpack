@@ -12,7 +12,8 @@ const expect = require('chai').expect,
 
 const fsUnlink = util.promisify(fs.unlink),
       fsMkdir = util.promisify(fs.mkdir),
-      fsReaddir = util.promisify(fs.readdir);
+      fsReaddir = util.promisify(fs.readdir),
+      fsReadFile = util.promisify(fs.readFile);
 
 const debug = Symbol.for('debug');
 
@@ -109,7 +110,15 @@ describe('contents manager TODO', () => {
       const docInfo = contentsMng.genDocInfo(['text', 'サンプル', 'Sample Title']);
       const contentsID = counter.add(docInfo);
       await Promise.all(counter[debug].wroteContents);
-      expect(contentsID).is.a('string');    
+      expect(contentsID).is.a('string');
+      const contentsData = await fsReadFile(
+        path.join(destFileFolderPath,contentsID),
+        {
+          encoding : 'utf8'
+        }
+      );
+      expect(contentsData).is.equal('サンプル');
+
     });
 
 
