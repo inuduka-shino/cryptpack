@@ -17,6 +17,13 @@ const fsUnlink = util.promisify(fs.unlink),
 
 const debug = Symbol.for('debug');
 
+function unlinkForce(filepath) {
+  return fsUnlink(filepath).catch((err)=>{
+    if (err.code !== 'ENOENT') {
+      throw err;
+    }
+  });
+}
 function mkdirForce(dirpath) {
   return fsMkdir(dirpath).catch((err)=>{
     if (err.code !== 'EEXIST') {
@@ -42,27 +49,34 @@ describe('mkEmptyDir test', () => {
   });
 });
 
+
 describe('contents manager TODO', () => {
   const workFolderPath = 'test/work',
         testfilepath = `${workFolderPath}/contentsManage.json`,
         destFileFolderPath = `${workFolderPath}/dest`,
         contentsIdBase='TEST_';
 
-  /*
-  async function defaultGen() {
-    const contentsMng = contentsManager({
-      contentsIdBase,
-      jsonFilePath: testfilepath,
-      destFileFolderPath,
-    });
-    await contentsMng.init();
-    return contentsMng;
+  async function clearContents() {
+    await mkdirForce(workFolderPath);
+    await Promise.all([
+      mkEmptyDir(destFileFolderPath),
+      unlinkForce(testfilepath),
+    ]);
   }
-  */
+  function readContents(contentsID) {
+    return fsReadFile(
+      path.join(destFileFolderPath,contentsID),
+      {
+        encoding : 'utf8'
+      }
+    );
+  }
+  function readContentManagerSaveFile() {
+    return jsonFile(testfilepath).load();
+  }
 
   before(async ()=>{
-    await mkdirForce(workFolderPath);
-    await mkEmptyDir(destFileFolderPath);
+    await clearContents();
   });
 
   it('require js-moduel',() => {
@@ -85,7 +99,11 @@ describe('contents manager TODO', () => {
     await cMng.init();
     return cMng;
   }
+
   describe('contents manager cntrol image', () => {
+    before(async ()=>{
+      await clearContents();
+    });
     it('gen contentManager & init', async () =>{
       const contentsMng = await gencContentsManager();
       expect(contentsMng).has.property('init');
@@ -118,9 +136,34 @@ describe('contents manager TODO', () => {
         }
       );
       expect(contentsData).is.equal('サンプル');
-
     });
-
-
   });
+  describe('regist', ()=>{
+    beforeEach(async ()=>{
+      await clearContents();
+    });
+    it('regist DocInfo', async () =>{
+      const sampleData = 'いろはにほへと',
+            sampleTitle = 'title is いろは';
+      const contentsMng = await gencContentsManager();
+      const clientID='AAAA';
+      const counter = contentsMng.client(clientID);
+      const docInfo = contentsMng.genDocInfo(['text', sampleData, sampleTitle]);
+      const contentsID = counter.add(docInfo);
+      await counter.regist();
+      // check contentsManageer saver file
+       const cmjObj = await readContentManagerSaveFile();
+       expect(cmjObj.title).is.equal('contents map');
+      // check contents
+      const contentsData = await readContents(contentsID);
+      expect(contentsData).is.equal(sampleData);
+      expect(cmjObj.contentsInfo[contentsID].title).is.equal(sampleTitle);
+      // check indexContents
+      const indexContentsID = counter.getIndexContentsID();
+      const indexData = await readContents(indexContentsID),
+            indexObj = JSON.parse(indexData);
+      expect(indexObj.contentsList[0]).is.deep.equal([contentsID, sampleTitle]);
+    });
+  });
+
 });

@@ -83,7 +83,7 @@ define((require) => {
     // contentsInfo, contentsList, index, contentsID, wroteContents, destFileFolderPath
     param.contentsList.splice(param.index,1);
     Reflect.deleteProperty(param.contentsInfo, param.contentsID);
-    const destPath = path.join(param.destFileFolderPath, param.contents.ID);
+    const destPath = path.join(param.destFileFolderPath, param.contentsID);
 
     param.wroteContents.push(fsUnlink(destPath));
   }
@@ -98,7 +98,7 @@ define((require) => {
       contentsList,
       index,
       contentsID: contentsList[index],
-      wroteContents: cntxt.wroteContents,
+      wroteContents: ccntxt.wroteContents,
       destFileFolderPath: cntxt.destFileFolderPath
     });
   }
@@ -125,8 +125,9 @@ define((require) => {
     const managerCntxt = ccntxt.managerCntxt,
           cientContentInfo = managerCntxt.clientContentMap[ccntxt.clientID];
 
-    deleteContentsByIndex(ccntxt, cientContentInfo.indexContentsIndex);
-
+    if (cientContentInfo.indexContentsIndex !== null) {
+      deleteContentsByIndex(ccntxt, cientContentInfo.indexContentsIndex);
+    }
     const idexContensInfo = genDocInfo([
       'text',
       genIndexContents(managerCntxt.contentsInfo, cientContentInfo.contentsList),
@@ -144,6 +145,11 @@ define((require) => {
     return Promise.all(wroteContents.concat(wroteSaver));
   }
 
+  function getIndexContentsID(ccntxt) {
+    const clientInfo = ccntxt.managerCntxt.clientContentMap[ccntxt.clientID],
+          idx = clientInfo.indexContentsIndex;
+    return clientInfo.contentsList[idx];
+  }
   function client(managerCntxt, clientID) {
     const ccntxt = {
       managerCntxt,
@@ -158,6 +164,7 @@ define((require) => {
         }),
         regist: regist.bind(null, ccntxt),
         deleteContents: deleteContentsByContentsID.bind(null, ccntxt),
+        getIndexContentsID: getIndexContentsID.bind(null, ccntxt),
     };
   }
 

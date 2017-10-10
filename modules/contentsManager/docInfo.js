@@ -11,7 +11,7 @@ define((require) => {
         stream = require('stream');
 
   function genIndexContents(contentsInfo, contentsList) {
-    return JSON.stringfy({
+    return JSON.stringify({
       contentsList:  contentsList.map((contentsID)=>{
         const contentsInfoSaveImage = contentsInfo[contentsID];
         return [contentsID, contentsInfoSaveImage.title];
