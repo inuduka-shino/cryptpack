@@ -54,6 +54,8 @@ describe('contents manager TODO', () => {
   const workFolderPath = 'test/work',
         testfilepath = `${workFolderPath}/contentsManage.json`,
         destFileFolderPath = `${workFolderPath}/dest`,
+        sampleSrcFileFolderPath = `${workFolderPath}/src`,
+        sampleSrcFile = `${sampleSrcFileFolderPath}/testSrc.txt`,
         contentsIdBase='TEST_';
 
   async function clearContents() {
@@ -163,6 +165,33 @@ describe('contents manager TODO', () => {
       const indexData = await readContents(indexContentsID),
             indexObj = JSON.parse(indexData);
       expect(indexObj.contentsList[0]).is.deep.equal([contentsID, sampleTitle]);
+    });
+    it('regist DocInfo twice', async () =>{
+      const clientID='AAAZ';
+      let indexContentsID = null;
+      await (async ()=>{
+        const sampleData = '最初',
+              sampleTitle = 'Sample 01';
+        const contentsMng = await gencContentsManager();
+        const counter = contentsMng.client(clientID);
+        const docInfo = contentsMng.genDocInfo(['text', sampleData, sampleTitle]);
+        counter.add(docInfo);
+        await counter.regist();
+      })();
+      await (async ()=>{
+        const contentsMng = await gencContentsManager();
+        const counter = contentsMng.client(clientID);
+        const docInfo = contentsMng.genDocInfo(['file', sampleSrcFile]);
+        counter.add(docInfo);
+        await counter.regist();
+        indexContentsID = counter.getIndexContentsID();
+      })();
+      // check indexContents
+      const indexData = await readContents(indexContentsID),
+            indexObj = JSON.parse(indexData);
+      console.log(indexObj);
+      expect(indexObj.contentsList[0][1]).is.equal('Sample 01');
+      expect(indexObj.contentsList[1][1]).is.equal('testSrc.txt');
     });
   });
 
