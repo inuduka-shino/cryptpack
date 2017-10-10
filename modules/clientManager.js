@@ -2,15 +2,24 @@
 /*eslint-env node */
 /*eslint-disable no-console: "warn" */
 
-const fs = require('fs'),
-      util = require('util');
+function define(func) {
+  module.exports = func(require);
+}
 
-const fsReadFile = util.promisify(fs.readFile),
-      fsWriteFile = util.promisify(fs.writeFile);
+define((require) => {
+  const jsonFile = require('./jsonFile'),
+        objectSaver = require('./objectSaver');
 
-const clientIdBase = 'ASS002';
+  function genClientId(cntxt) {
+    const counter = cntxt.counter + 1;
 
-module.exports = (()=>{
+    if (counter > 99999) {
+      throw new Error(`overflow client map count over ${counter}`);
+    }
+    cntxt.counter = counter;
+
+    return cntxt.clientIdBase + 'CA' + ('00000' + counter).slice(-5);
+  }
 
   function genClientData(clientId, clientInfo) {
     return {
@@ -20,100 +29,61 @@ module.exports = (()=>{
     };
   }
 
-function genClientId(clientMap) {
-  const counter = clientMap.counter + 1;
+  async function registClient(cntxt, clientInfo) {
+    await cntxt.saver.initOrDoNothing();
 
-  if (clientMap.couter > 99999) {
-    throw new Error(`overflow client map count over ${counter}`);
+    const clientId = genClientId(cntxt);
+    cntxt.clientInfo[clientId] = genClientData(clientId, clientInfo);
+
+    await cntxt.saver.flush();
+
+    return clientId;
   }
-  const counterStr = ('00000' + counter).slice(-5);
 
-  return [counter, clientIdBase + 'CA' + counterStr];
-}
-
-function clientMapFile(mapFilePath) {
-    function loadMap() {
-      const loadPromise = fsReadFile(
-        mapFilePath,
-        {
-            flag: 'r',
-            encoding: 'utf8'
-          }
-        );
-
-      return (
-        loadPromise
-        .then((data) => {
-            return JSON.parse(data);
-        })
-        .catch((err) => {
-          if (err.code === 'ENOENT') {
-
-            return {
-              title: 'client map',
-              counter: 0,
-            };
-          }
-          throw new Error(`Mapfile read error! err.code=(${err.code}) filepath=(${mapFilePath})`);
-        })
-      );
-    }
-
-    function saveMap(data) {
-      return fsWriteFile(
-        mapFilePath,
-        JSON.stringify(data),
-        {
-          flag: 'w',
-          encoding: 'utf8'
-        }
-      );
-    }
+  async function getClient(cntxt, clientId) {
+    await cntxt.saver.initOrDoNothing();
+    const _=null;
 
     return {
-      loadMap,
-      saveMap
+      //
+      publicKeyString () {
+        return cntxt.clientInfo[clientId].publicKeyString;
+      },
+      _,
     };
-
-}
+  }
 
   function generate(clientMapFilePath) {
-    const cmFile = clientMapFile(clientMapFilePath);
-    let clientMap = null;
+    const clientIdBase = 'ASS002';
+    const cntxt = {
+          clientIdBase,
+          saver: null,
+          // mapping from json File
+          counter: null,
+          clientInfo: null,
+        };
 
-    async function registClient(clientInfo) {
-      if (clientMap === null) {
-        clientMap = await cmFile.loadMap();
-      }
-      const [counter, clientId] = genClientId(clientMap);
-
-      clientMap.counter = counter;
-      clientMap[clientId] = genClientData(clientId, clientInfo);
-
-      await cmFile.saveMap(clientMap);
-
-      return clientId;
-    }
-
-    async function getClient(clientId) {
-      if (clientMap === null) {
-        clientMap = await cmFile.loadMap();
-      }
-
-      return {
-        publicKeyString () {
-          return clientMap[clientId].publicKeyString;
-        }
-      };
-    }
+    cntxt.saver = objectSaver({
+        objInfo: cntxt,
+        saver: jsonFile(clientMapFilePath),
+        propList:  [
+          'counter',
+          'clientInfo'
+        ],
+        initSaveData:{
+          //
+          title: 'client map',
+          // for countns id
+          counter: 0,
+          clientInfo: {},
+        },
+      });
 
     return {
-      registClient,
-      getClient,
+      registClient: registClient.bind(null, cntxt),
+      getClient: getClient.bind(null, cntxt),
     };
   }
 
-  return {
-      generate
-    };
-})();
+  return generate;
+});
