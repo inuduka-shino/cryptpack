@@ -189,7 +189,6 @@ describe('contents manager TODO', () => {
       // check indexContents
       const indexData = await readContents(indexContentsID),
             indexObj = JSON.parse(indexData);
-      console.log(indexObj);
       expect(indexObj.contentsList[0][1]).is.equal('Sample 01');
       expect(indexObj.contentsList[1][1]).is.equal('testSrc.txt');
     });
