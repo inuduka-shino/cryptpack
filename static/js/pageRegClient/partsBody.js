@@ -20,7 +20,7 @@ define((require)=>{
         pRegButton = partsButton(),
         pTestButton = partsButton(),
         pMessage2 = partsMessage(),
-        pMessage3 = partsMessage();
+        pErrorMessage = partsMessage();
 
   const bodyChildren = [
       h('h3', 'クライアント登録'),
@@ -28,8 +28,8 @@ define((require)=>{
       partsRow([partsCol(pRegButton.setLabel('登録'))]),
       partsRow([partsCol(pTestButton.setLabel('テスト'))]),
       partsRow([
-        partsCol(pMessage2, 'xs-6'),
-        partsCol(pMessage3, 'xs-6'),
+        partsCol(pMessage2),
+        partsCol(pErrorMessage),
       ]),
     ];
 
@@ -37,9 +37,16 @@ define((require)=>{
   pRegButton.onclick(()=>{
     pRegButton.setLabel('登録中...');
     pMessage.set('登録処理開始');
-    return srvApp.regSeckey().then(()=>{
+    return srvApp.regSeckey().then(
+      ()=>{
+        pMessage.set('登録処理完了');
+      },
+      (err)=>{
+        pMessage.set('登録処理失敗');
+        pErrorMessage.set(err.message);
+      }
+    ).then(()=>{
       pRegButton.setLabel('登録');
-      pMessage.set('登録処理完了');
       scheduleRender();
     });
   });
@@ -52,13 +59,17 @@ define((require)=>{
     msgPrmses.forEach((msgPrms, idx)=>{
       msgPrms.then((msg)=>{
         messages[idx] = msg;
-        pMessage3.set(messages.join(':'));
+        pMessage2.set(messages.join(':'));
         scheduleRender();
       });
     });
     return Promise.all(msgPrmses).then(()=>{
-      pTestButton.setLabel('テスト');
       pMessage.set('テストメッセージ取得完了');
+    }, (err) => {
+      pMessage.set('テストメッセージ取得失敗');
+      pErrorMessage.set(err.message);
+    }).then(()=>{
+      pTestButton.setLabel('テスト');
       scheduleRender();
     });
   });

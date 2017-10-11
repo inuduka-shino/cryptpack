@@ -7,7 +7,7 @@ define((require) => {
         pCryptico = require('cryptico'),
         domUtil = require('./domUtil'),
         cryptoTest = require('./cryptoTest'),
-        cxMng = require('./cx'),
+        cxMng = require('./cx/cx'),
         base64Util = require('./base64Util'),
         clientSaver = require('./clientSaver');
 

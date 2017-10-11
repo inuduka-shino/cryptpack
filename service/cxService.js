@@ -10,7 +10,7 @@ const cryptico = require('cryptico'),
       clientManager = require('../modules/clientManager'),
       testMessage = require('../modules/testMessage');
 
-const clientMng = clientManager.generate(config.clientFilePath);
+const clientMng = clientManager(config.clientFilePath);
 
 function getRandSeed() {
   return randomString.get();
