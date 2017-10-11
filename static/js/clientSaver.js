@@ -112,7 +112,14 @@ define(() => {
     const ret = await new Promise((resolve, reject)=>{
       req.onsuccess = () =>{
         db.close();
-        resolve(req.result.value);
+        // TODO: no-data CASE 追加
+        if (typeof req.result === 'undefined') {
+          console.log('debug:20171012');
+          console.log(req.result);
+          reject(new Error(`no data at (${osnName}:${key})`));
+        } else {
+          resolve(req.result.value);
+        }
       };
       req.onerror = (err) => {
         console.log(err);
