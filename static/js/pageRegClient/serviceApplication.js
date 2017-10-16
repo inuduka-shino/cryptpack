@@ -9,7 +9,10 @@ define((require)=>{
         crypticoUtil = require('../crypticoUtil'),
         cxMng = require('../cx/cx'),
         base64Util = require('../base64Util'),
-        clientSaver = require('../clientSaver');
+        clientSaver = require('../clientSaver'),
+        ErrorModule = require('../error');
+
+  const CError = ErrorModule.CError;
 
   const cryptico = pCryptico.cryptico;
   const cx = cxMng();
@@ -25,6 +28,7 @@ define((require)=>{
       if (userInfo === null) {
         userInfo = await clntSvr.loadUserInfo(userId);
         clientId = userInfo.lastClientId;
+        throw new CError('NO_LAST_CID', 'last ClientID が設定されていません');
       }
       if (aRSAKey === null) {
         const aRSAKeyInfo = await clntSvr.loadRSAKey(clientId);
