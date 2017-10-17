@@ -33,27 +33,32 @@ define((require)=>{
       ]),
     ];
 
+  function anyAction() {
+    pErrorMessage.set('');
+  }
 
-  pRegButton.onclick(()=>{
+  pRegButton.onclick(async ()=>{
+    anyAction();
     pRegButton.setLabel('登録中...');
     pMessage.set('登録処理開始');
-    return srvApp.regSeckey().then(
-      ()=>{
-        pMessage.set('登録処理完了');
-      },
-      (err)=>{
-        pMessage.set('登録処理失敗');
-        pErrorMessage.set(err.message);
-      }
-    ).then(()=>{
-      pRegButton.setLabel('登録');
-      scheduleRender();
-    });
+    await srvApp.regSeckey().then(
+              ()=>{
+              pMessage.set('登録処理完了');
+            },
+            (err)=>{
+              pMessage.set('登録処理失敗');
+              pErrorMessage.set(err.message);
+            }
+          );
+    pRegButton.setLabel('登録');
+    scheduleRender();
   });
 
-  pTestButton.onclick(()=>{
+  pTestButton.onclick(async ()=>{
+    anyAction();
     pTestButton.setLabel('処理中...');
     pMessage.set('テストメッセージ取得中');
+
     const msgPrmses = srvApp.getTestMessages(),
           messages = ['','',''];
     msgPrmses.forEach((msgPrms, idx)=>{
@@ -63,15 +68,16 @@ define((require)=>{
         scheduleRender();
       });
     });
-    return Promise.all(msgPrmses).then(()=>{
-      pMessage.set('テストメッセージ取得完了');
-    }, (err) => {
-      pMessage.set('テストメッセージ取得失敗');
-      pErrorMessage.set(err.message);
-    }).then(()=>{
-      pTestButton.setLabel('テスト');
-      scheduleRender();
-    });
+
+    await Promise.all(msgPrmses).then(()=>{
+            pMessage.set('テストメッセージ取得完了');
+          }, (err) => {
+            pMessage.set('テストメッセージ取得失敗');
+            pErrorMessage.set(err.message);
+          });
+
+    pTestButton.setLabel('テスト');
+    scheduleRender();
   });
 
 
