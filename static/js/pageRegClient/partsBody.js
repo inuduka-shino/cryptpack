@@ -18,89 +18,105 @@ define((require)=>{
 
   const pMessage = partsMessage(),
         pRegButton = partsButton(),
-        pTestButton = partsButton(),
-        pMessage2 = partsMessage(),
         pErrorMessage = partsMessage();
 
-  const bodyChildren = [
-      h('h3', 'クライアント登録'),
-      partsRow(partsCol(pMessage)),
-      partsRow([partsCol(pRegButton.setLabel('登録'))]),
-      partsRow([partsCol(pTestButton.setLabel('テスト'))]),
-      partsRow([
-        partsCol(pMessage2),
-        partsCol(pErrorMessage),
-      ]),
-    ];
 
+  function message(msg) {
+    pMessage.set(msg);
+  }
+  function errorMessage(msg) {
+    pErrorMessage.set(msg);
+  }
   function anyAction() {
-    pErrorMessage.set('');
+    message('');
+    errorMessage('');
   }
 
+  // ユーザ登録
+  pRegButton.setLabel('登録');
   pRegButton.onclick(async ()=>{
     anyAction();
     pRegButton.setLabel('登録中...');
-    pMessage.set('登録処理開始');
+    message('登録処理開始');
     await srvApp.regSeckey().then(
               ()=>{
-              pMessage.set('登録処理完了');
+              message('登録処理完了');
             },
             (err)=>{
-              pMessage.set('登録処理失敗');
-              pErrorMessage.set(err.message);
+              message('登録処理失敗');
+              errorMessage(err.message);
             }
           );
     pRegButton.setLabel('登録');
     scheduleRender();
   });
 
+  // テストメッセージ取得
+  const pTestButton = partsButton(),
+        pTestButtonMessage = partsMessage();
+  pTestButton.setLabel('テスト');
   pTestButton.onclick(async ()=>{
     anyAction();
     pTestButton.setLabel('処理中...');
-    pMessage.set('テストメッセージ取得中');
+    message('テストメッセージ取得中');
 
     const msgPrmses = srvApp.getTestMessages(),
           messages = ['','',''];
     msgPrmses.forEach((msgPrms, idx)=>{
       msgPrms.then((msg)=>{
         messages[idx] = msg;
-        pMessage2.set(messages.join(':'));
+        pTestButtonMessage.set(messages.join(':'));
         scheduleRender();
       });
     });
 
     await Promise.all(msgPrmses).then(()=>{
-            pMessage.set('テストメッセージ取得完了');
+            message('テストメッセージ取得完了');
           }, (err) => {
-            pMessage.set('テストメッセージ取得失敗');
-            pErrorMessage.set(err.message);
+            message('テストメッセージ取得失敗');
+            errorMessage(err.message);
           });
 
     pTestButton.setLabel('テスト');
     scheduleRender();
   });
 
+  return (()=>{
+    const bodyChildren = [
+        h('h3', 'クライアント登録'),
+        //メッセージ
+        partsRow(partsCol(pMessage)),
+        partsRow(partsCol(pErrorMessage)),
+        // ユーザ表示・選択
+        // .....
+        // テストボタン
+        partsRow([
+          partsCol(pTestButton, 'xs-2'),
+          partsCol(pTestButtonMessage, 'xs-10'),
+        ]),
+        // ユーザ登録ボタン
+        partsRow([partsCol(pRegButton)]),
+      ];
+    const bodyClasses = {
+      smartphone: false,
+    };
+    function setEnv(envObj) {
+      bodyClasses.smartphone = envObj.smartphone;
+      scheduleRender = envObj.scheduleRender;
+    }
 
-  const bodyClasses = {
-    smartphone: false,
-  };
-  function setEnv(envObj) {
-    bodyClasses.smartphone = envObj.smartphone;
-    scheduleRender = envObj.scheduleRender;
-  }
+    function render() {
+      return h('body',
+        {
+          classes: bodyClasses,
+        },
+        bodyChildren.map(mqUtil.callRenderForArray)
+      );
+    }
 
-  function render() {
-
-    return h('body',
-      {
-        classes: bodyClasses,
-      },
-      bodyChildren.map(mqUtil.callRenderForArray)
-    );
-  }
-
-  return {
-    setEnv,
-    render,
-  };
+    return {
+      setEnv,
+      render,
+    };
+  })();
 });
