@@ -36,7 +36,7 @@ define((require) => {
     if (ret === null || typeof ret === 'undefined') {
       return;
     }
-    if (ret.then) {
+    if (ret instanceof Promise) {
       cntx.light = true;
       ret.then(() => {
         cntx.light = false;

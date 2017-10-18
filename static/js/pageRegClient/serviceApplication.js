@@ -9,7 +9,10 @@ define((require)=>{
         crypticoUtil = require('../crypticoUtil'),
         cxMng = require('../cx/cx'),
         base64Util = require('../base64Util'),
-        clientSaver = require('../clientSaver');
+        clientSaver = require('../clientSaver'),
+        ErrorModule = require('../error');
+
+  const CError = ErrorModule.CError;
 
   const cryptico = pCryptico.cryptico;
   const cx = cxMng();
@@ -24,6 +27,9 @@ define((require)=>{
     async function loadClientEnv() {
       if (userInfo === null) {
         userInfo = await clntSvr.loadUserInfo(userId);
+        if (userInfo === null) {
+          throw new CError('NO_USER_INFO', `ユーザ(${userId})が登録されていません。`);
+        }
         clientId = userInfo.lastClientId;
       }
       if (aRSAKey === null) {
@@ -76,22 +82,16 @@ define((require)=>{
 
   function getTestMessages () {
     const envPrms = clientEnv.loadClientEnv();
-    return [0,1,2].map((testId)=>{
-      return envPrms.then((env) => {
-        return cx.getTestMessage(env.clientId, testId).then((enctext)=>{
-          return [env, enctext];
-        });
-      }).then(([env,enctext]) => {
-        const decObj = cryptico.decrypt(enctext, env.aRSAKey);
+    return [0,1,2].map(async (testId)=>{
+      const env = await envPrms;
+      const enctext = await cx.getTestMessage(env.clientId, testId);
+      const decObj = cryptico.decrypt(enctext, env.aRSAKey);
 
-        if (decObj.status !== 'success') {
-          throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
-        }
-
-        return base64Util.decode(decObj.plaintext);
-      });
+      if (decObj.status !== 'success') {
+        throw new Error(`cryptico.decrypt error!(status=${decObj.status})`);
+      }
+      return base64Util.decode(decObj.plaintext);
     });
-
   }
 
   return {
